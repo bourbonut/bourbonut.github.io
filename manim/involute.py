@@ -4,12 +4,12 @@ import numpy as np
 from math import radians, pi, cos, sin, tan, acos, asin, atan2
 from itertools import pairwise, starmap, chain
 
-O = np.array([0, 0, 0])
-X = np.array([1, 0, 0])
-Y = np.array([0, 1, 0])
-Z = np.array([0, 0, 1])
+O = vec3(0, 0, 0)
+X = vec3(1, 0, 0)
+Y = vec3(0, 1, 0)
+Z = vec3(0, 0, 1)
 
-rotation = lambda t: np.array([[cos(t), -sin(t), 0], [sin(t), cos(t), 0], [0, 0, 1]])
+rotation = lambda t: mat3([cos(t), -sin(t), 0, [sin(t), cos(t), 0], [0, 0, 1]])
 
 
 def multilines(points, closed=False):
@@ -30,163 +30,138 @@ def repeat(vgroup, times, step, direction=X):
     return final_vgroup
 
 
-def default_height(step, alpha):
-    return 0.5 * 2.25 * step / pi * cos(alpha) / cos(radians(20))
+def revolution(vgroup, angle, times):
+    final_vgroup = vgroup.copy()
+    for i in range(times):
+        rotated_vgroup = vgroup.copy().rotate_about_origin(angle * i)
+        for line in rotated_vgroup:
+            final_vgroup += line
+    return final_vgroup
 
 
-def rackprofile(step, h=None, offset=0, alpha=radians(20)):
-    if h is None:
-        h = default_height(step, alpha)
-    e = offset  # change name for convenience
+def rackprofile(m, alpha=radians(20), ka=1, kf=1.25):
+    ha = m * ka  # adendum height
+    hf = m * kf  # deddendum height
+    p = pi * m  # step
+    la = p * 0.5 - 2 * tan(alpha) * ha  # adendum length of tooth
+    lf = p * 0.5 - 2 * tan(alpha) * hf  # deddendum length of tooth
 
-    # fraction of the tooth above the primitive circle
-    x = 0.5 + 2 * e / step * tan(alpha)
+    #    B ____ C
+    #     /    \
+    #    /      \
+    # A /      D \____ E
 
     return multilines(
         [
-            np.array([step * x / 2 - tan(alpha) * (h - e), h - e, 0]),
-            np.array([step * x / 2 - tan(alpha) * (-h - e), -h - e, 0]),
-            np.array([step * (2 - x) / 2 + tan(alpha) * (-h - e), -h - e, 0]),
-            np.array([step * (2 - x) / 2 + tan(alpha) * (h - e), h - e, 0]),
-            np.array([step * (2 + x) / 2 - tan(alpha) * (h - e), h - e, 0]),
+            vec3(-tan(alpha) * hf, -hf, 0),  # A
+            vec3(tan(alpha) * ha, ha, 0),  # B
+            vec3(tan(alpha) * ha + la, ha, 0),  # C
+            vec3(p * 0.5 + tan(alpha) * hf, -hf, 0),  # D
+            vec3(p * 0.5 + lf + tan(alpha) * hf, -hf, 0),  # E
         ],
     )
 
 
-def involute(c, t0, t):
-    x = vec2(cos(t), sin(t))
-    y = vec2(-x[1], x[0])
-    return c * (x + y * (t0 - t))
+def anglebt(a, b):
+    return acos(dot(a, b) / (length(a) * length(b)))
 
 
-def involuteof(c, t0, d, t):
-    x = vec2(cos(t), sin(t))
-    y = vec2(-x[1], x[0])
-    return (c + d) * x + c * y * (t0 - t)
+def u(t):
+    return vec3(cos(t), sin(t), 0)
 
 
-def involuteat(c, r):
-    return sqrt((r / c) ** 2 - 1)
+def v(t):
+    return vec3(-sin(t), cos(t), 0)
 
 
-def angle(p):
-    return atan2(p[1], p[0])
+def involute(t, r):
+    return r * (u(t) - t * v(t))
 
 
-def interpol1(a, b, x):
-    return (1 - x) * a + x * b
+def inference_curve(t, r, x, y):
+    ut, vt = u(t), v(t)
+    return r * (ut - t * vt) + x * ut + y * vt
 
 
-def gearprofile(step, z, h=None, offset=0, alpha=radians(20)):
-    if h is None:
-        h = default_height(step, alpha)
-    p = step * z / (2 * pi)  # primitive circle
-    c = p * cos(alpha)  # tangent circle to gliding axis
+def derived_involute(t, r):
+    return r * t * u(t)
 
-    e = offset  # change name for convenience
-    # fraction of the tooth above the primitive circle
-    x = 0.5 + 2 * offset / step * tan(alpha)
 
-    o0 = angle(involute(c, 0, tan(alpha)))  # offset of contact curve
-    oi = atan((h - e) / p * tan(alpha))  # offset of interference curve
+def derived_inference_curve(t, r, x, y):
+    ut, vt = u(t), v(t)
+    return r * t * u(t) + x * vt - y * ut
 
-    l0 = involuteat(c, p + h + e)  # interval size of contact curve
 
-    # if the tooth height is unreachable, find the intersection between the two contact curves
-    t0 = -step / (2 * p) * x - o0
-    t = t0 + l0
-    if involute(c, t0, t)[1] > 0:
-        # Newton solver method
-        for i in range(5):
-            f = sin(t) + cos(t) * (t0 - t)
-            J = -sin(t) * (t0 - t)
-            t -= f / J
-        l0 = t - t0
+def gearprofile(m, z, alpha=radians(20), ka=1, kf=1.25, inference=False):
+    ha = m * ka  # adendum height
+    hf = m * kf  # deddendum height
+    p = pi * m  # step
+    rp = m * z * 0.5
+    ra = rp + ha
+    rf = rp - hf
+    rb = rp * cos(alpha)
 
-    # if there is an interference curve
-    interference = c > p - h + e
-    if interference:
-        # Newton solver method
-        # to compute the parameters (t1, t2) of the intersection between contact line and interference line
-        t0, ti = o0, oi
-        # initial state
-        t1 = t0 - tan(alpha)  # put contact line on primitive
-        # put interference point on base circle
-        t2 = ti + sqrt(c ** 2 - (p - h + e) ** 2) / p
-        for i in range(8):
-            ct1, ct2 = cos(t1), cos(t2)
-            st1, st2 = sin(t1), sin(t2)
-            # function value
-            f = (
-                c * vec2(ct1, st1)
-                + c * (t0 - t1) * vec2(-st1, ct1)
-                + (h - e - p) * vec2(ct2, st2)
-                - p * (ti - t2) * vec2(-st2, ct2)
-            )
-            # jacobian matrix (f partial derivatives)
-            J = mat2(
-                -c * (t0 - t1) * vec2(ct1, st1),
-                p * (ti - t2) * vec2(ct2, st2) + (h - e) * vec2(-st2, ct2),
-            )
-            # iteration
-            t1, t2 = vec2(t1, t2) - inverse(J) * f
-        li = t2 - ti  # interval size of interference curve
-        s0 = t0 - t1  # generation start of contact curve
+    ta = sqrt(ra * ra / (rb * rb) - 1)
+    tp = sqrt(rp * rp / (rb * rb) - 1)
+
+    if inference:
+        pass
     else:
-        s0 = involuteat(c, p - h + e)
+        tb = 0
+        phase = PI / z + 2 * (tp - atan2(tp, 1))
+        side1 = ParametricFunction(lambda x: involute(x, rb), t_range=[tb, ta])
+        side2 = side1.copy().apply_matrix(mat3(X, -Y, Z)).rotate_about_origin(phase)
+        alpha = ta - atan2(ta, 1)
+        top = ParametricFunction(
+            lambda t: ra * u(t), t_range=[0.96 * alpha, 1.02 * (phase - alpha)]
+        )
 
-    pts = []
-    # number of points to place
-    n = 20
+        small_radius = 0.5 * (rb - rf)
+        segment_after = Line((rf + small_radius) * u(phase), rb * 1.01 * u(phase))
+        segment_before = Line((rf + small_radius) * u(0), rb * 1.01 * u(0))
 
-    # parameter for first side
-    place = step / (2 * p) * x  # place of intersection with the primitive circle
-    t0 = place + o0  # start of contact curve
-    ti = place + oi  # start of interference curve
-    # contact line
-    for i in range(n + 1):
-        t = interpol1(t0 - l0, t0 - s0, i / n)
-        v = involute(c, t0, t)
-        pts.append(vec3(v, 0))
-    # interference line
-    if interference:
-        for i in range(n + 1):
-            t = interpol1(ti + li, ti, i / n)
-            v = involuteof(p, ti, -h + e, t)
-            pts.append(vec3(v, 0))
+        small_angle = asin(small_radius / rf) * 0.92
+        bottom = ParametricFunction(
+            lambda t: rf * u(t),
+            t_range=[0.98 * (phase + small_angle), 1.02 * (2 * PI / z - small_angle)],
+        )
+        small_center = (rf + small_radius) * X
+        arc_after = ParametricFunction(
+            lambda t: small_center + small_radius * u(t), t_range=[-PI, -PI / 2]
+        ).rotate_about_origin(phase + small_angle)
+        arc_before = ParametricFunction(
+            lambda t: small_center + small_radius * u(t), t_range=[PI / 2, PI]
+        ).rotate_about_origin(-small_angle)
 
-    # parameters for second side
-    place = step / (2 * p) * (2 - x)
-    t0 = place - o0
-    ti = place - oi
-    # interference line
-    if interference:
-        for i in range(n + 1):
-            t = interpol1(ti, ti - li, i / n)
-            v = involuteof(p, ti, -h + e, t)
-            pts.append(vec3(v, 0))
-    # contact line
-    for i in range(n + 1):
-        t = interpol1(t0 + s0, t0 + l0, i / n)
-        v = involute(c, t0, t)
-        pts.append(vec3(v, 0))
-
-    pts.append(angleAxis(step / p, vec3(0, 0, 1)) * pts[0])
-
-    return multilines(map(np.array, pts))
+        return VGroup(
+            side1,
+            side2,
+            top,
+            segment_before,
+            segment_after,
+            arc_after,
+            arc_before,
+            bottom,
+        )
 
 
 class Test(Scene):
     def construct(self):
-        wire = rackprofile(2)
-        self.add(repeat(wire, 3, 2))
+        # wire = rackprofile(2)
+        # self.add(repeat(wire, 3, 2))
         # self.add(wire)
+        func = ParametricFunction(lambda x: involute(x, 1), t_range=[0, PI])
+        # func2 = ParametricFunction(lambda x: involute(x, 1), t_range=[0, PI])
+        # self.add(func.rotate_about_origin(PI / 2))
+        # self.add(func2.apply_matrix(mat3(X, -Y, Z)))
+        # self.add(func)
+        self.add(revolution(gearprofile(0.5, 12), 2 * PI / 12, 12))
 
 
 class InvoluteFunction(Scene):
     def involute(self, t):
-        x = np.array([cos(t), sin(t), 0])
-        y = np.array([-x[1], x[0], 0])
+        x = vec3(cos(t), sin(t), 0)
+        y = vec3(-x[1, x[0], 0])
         return self.radius * (x + y * (self.t0 - t))
 
     def construct(self):
@@ -209,7 +184,7 @@ class InvoluteFunction(Scene):
 
         def go_around_circle(mob, dt):
             self.t_offset += dt * rate
-            mob.move_to(np.array([cos(self.t_offset), sin(self.t_offset), 0]))
+            mob.move_to(vec3(cos(self.t_offset), sin(self.t_offset), 0))
 
         def go_line_circle():
             return Line(origin, dotc.get_center())
@@ -278,12 +253,11 @@ class InvoluteFunction(Scene):
         self.add(dotc, doti)
         self.add(origin2circle, circle2involute, angle, rightangle, involute)
         self.wait(10)
-        # func = ParametricFunction(self.involute, t_range=np.array([0., 2.*pi]), fill_opacity=0)
+        # func = ParametricFunction(self.involute, t_range=vec3(0., 2.*pi), fill_opacity=0)
         # self.add(func)
 
 
 class Gear(Scene):
-
     def construct(self):
         m = 0.5
         z = 12
@@ -304,3 +278,9 @@ class Gear(Scene):
         circle_addendum = DashedVMobject(Circle(r_addendum, color=BLUE))
         circle_dedendum = DashedVMobject(Circle(r_dedendum, color=BLUE))
         self.add(full_profile, circle_pitch, circle_addendum, circle_dedendum)
+
+
+class Rack(Scene):
+    def construct(self):
+        m = 0.5
+        self.add(rackprofile(m))
