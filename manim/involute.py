@@ -73,28 +73,22 @@ def u(t):
 def v(t):
     return vec3(-sin(t), cos(t), 0)
 
-
-def involute(t, r):
-    return r * (u(t) - t * v(t))
-
-def involute2(t, r, t0):
+def involute(t, r, t0=0):
     return r * (u(t - t0) - t * v(t - t0))
 
-def interference_curve(t, r, x, t0):
-    return involute2(t, r, t0) - x * u(t)
-
+def interference_curve(t, r, x, y, t0):
+    return involute(t, r, t0) - x * u(t - t0) + y * v(t - t0)
 
 def derived_involute(t, r, t0):
     return r * t * u(t - t0)
 
+def derived_interference_curve(t, r, x, y, t0):
+    return derived_involute(t, r, t0) - x * v(t - t0) - y * u(t - t0)
 
-def derived_interference_curve(t, r, x, t0):
-    return derived_involute(t, r, t0) - x * v(t)
 
-
-def jacobian_involute(rb, rp, x, t0):
+def jacobian_involute(rb, rp, x, y, t0):
     return lambda t1, t2: mat3(
-        derived_involute(t1, rb, t0), -derived_interference_curve(t2, rp, x, t0), Z
+        derived_involute(t1, rb, t0), -derived_interference_curve(t2, rp, x, y, t0), Z
     )
 
 
@@ -117,17 +111,20 @@ def gearprofile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=False):
         ts = tp - atan2(tp, 1)
         phase = PI / z + 2 * (tp - atan2(tp, 1))
         phase_empty = 2 * PI / z - phase
-        sl = asin(la * 0.5 / rb) # rb
-        # sl = asin(la * 0.5 / (rp - ka * m)) # rb
-        f = lambda t1, t2: involute(t1, rb) - interference_curve(t2, rp, ka * m, phase_empty * 0.5 - sl)
-        J = jacobian_involute(rb, rp, ka * m, phase_empty * 0.5 - sl)
+        # sl = asin(la * 0.5 / rb)
+        # sl = atan2(la * 0.5 , rb)
+        # sl = atan2(la * 0.5 , rp) 
+        sl = atan2(la * 0.5, (rp - ka * m))
+        print(rb, rp, 0.5 * phase, la * 0.5)
+        f = lambda t1, t2: involute(t1, rb) - interference_curve(t2, rp, ka * m, 0.5 * la, phase_empty * 0.5)
+        J = jacobian_involute(rb, rp, ka * m, 0.5 * la, phase_empty * 0.5)
         t1, t2, t3 = 0.5 * ta, -0.5 * ta, 0
-        for i in range(4):
+        for i in range(2):
             t1, t2, t3 = vec3(t1, t2, t3) - inverse(J(t1, t2)) * f(t1, t2)
 
         side1 = ParametricFunction(lambda x: involute(x, rb), t_range=[t1, ta])
         interference1 = ParametricFunction(
-            lambda t: interference_curve(t, rp, ka * m, phase_empty * 0.5 - sl), t_range=[t2, 0]
+            lambda t: interference_curve(t, rp, ka * m, 0.5 * la, phase_empty * 0.5), t_range=[t2, 0]
         )
         side2 = side1.copy().apply_matrix(mat3(X, -Y, Z)).rotate_about_origin(phase)
         interference2 = (
@@ -135,18 +132,18 @@ def gearprofile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=False):
         )
         angle_a = ta - atan2(ta, 1)
         top = Arc(ra, angle_a, phase - 2 * angle_a)
-        M = interference_curve(0, rp, ka * m, phase_empty * 0.5 - sl)
+        M = interference_curve(0, rp, ka * m, 0.5 * la, phase_empty * 0.5)
         angle_M = anglebt(M, u(0.5 * phase)) * 2
         bottom = Line(M, mat3(u(-2 * PI / z + angle_M), v(-2 * PI / z + angle_M), Z) * M)
 
-        i = ParametricFunction(lambda t: interference_curve(t, rp, ka * m, phase_empty * 0.5 - sl), t_range=[-0.5 * ta, 0.5 * ta], color=RED)
-        h = ParametricFunction(lambda t: involute2(t, rp, 0.5 * phase_empty - sl), t_range=[-0.5 * ta, 0.5 * ta], color=YELLOW)
-        # return VGroup(
-        #     side1, interference1, side2, interference2, top, bottom, i, Line(O, 2 * ra * u(-0.5 * phase_empty + sl)), h, Line(O, rb * X)
-        # ).rotate_about_origin(-phase * 0.5)
+        i = ParametricFunction(lambda t: interference_curve(t, rp, ka * m, 0.5 * la, phase_empty * 0.5), t_range=[-ta, ta], color=RED)
+        h = ParametricFunction(lambda t: involute(t, rp, 0.5 * phase_empty - sl), t_range=[-0.5 * ta, 0.5 * ta], color=YELLOW)
         return VGroup(
-            side1, interference1, side2, interference2, top, bottom,
+            side1, interference1, side2, interference2, top, bottom, i, Line(O, (rp - ka * m) * u(-0.5 * phase_empty + sl)), h, 
         ).rotate_about_origin(-phase * 0.5)
+        # return VGroup(
+        #     side1, interference1, side2, interference2, top, bottom,
+        # ).rotate_about_origin(-phase * 0.5)
     else:
         tb = 0
         phase = PI / z + 2 * (tp - atan2(tp, 1))
@@ -188,16 +185,18 @@ def gearprofile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=False):
 
 class Test(Scene):
     def construct(self):
-        m = 2
-        z = 24
+        m = 1
+        z = 12
         rp = m * z * 0.5
         l = -tan(radians(20)) * (1.25 * m)
         la = pi * m * 0.5 - 2 * tan(radians(20)) * 1 * m  # addendum length of tooth
         lf = pi * m * 0.5 - 2 * tan(radians(20)) * 1.25 * m  # dedendum length of tooth
         wire = rackprofile(m)
         g = VGroup(repeat(wire, 3, PI * m)) 
-        self.add(g.rotate_about_origin(PI / 2).shift(rp * X + (- PI * m - l + 0.5 * lf) * Y).shift(-rp * X)) # - (PI * m / 2 * Y)))
-        self.add(revolution(gearprofile(m, z, interference=True), 2 * PI / z, z).shift(-rp * X))# .rotate_about_origin(PI / z).shift(-rp * X))
+        # self.add(g.rotate_about_origin(PI / 2).shift(rp * X + (- PI * m - l + 0.5 * lf) * Y).shift(-rp * X))
+        self.add(revolution(gearprofile(m, z, interference=True), 2 * PI / z, z).rotate_about_origin(PI / z).shift(-rp * X))
+        self.add(g.rotate_about_origin(PI / 2).shift(rp * X + (- PI * m - l + 0.5 * lf) * Y).shift(-rp * X - (PI * m / 2 * Y)))
+        # self.add(revolution(gearprofile(m, z, interference=True), 2 * PI / z, z).shift(-rp * X))
         # self.add(Line(-10 * X, 10 *X))
 
 
