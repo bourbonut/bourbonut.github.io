@@ -14,16 +14,16 @@ class Test(Scene):
         m = 1
         z = 12
         rp = m * z * 0.5
-        l = -tan(radians(20)) * (1.25 * m)
-        la = pi * m * 0.5 - 2 * tan(radians(20)) * 1 * m  # addendum length of tooth
-        lf = pi * m * 0.5 - 2 * tan(radians(20)) * 1.25 * m  # dedendum length of tooth
-        wire = rack.profile(m)
-        g = VGroup(fast.repeat(wire, 3, PI * m)) 
+        alpha = radians(20)
+        ka = 1
+        kf = 1.25
+        la = rack.addendum_length(m, alpha, ka)  # addendum length of tooth
+        lf = rack.dedendum_length(m, alpha, kf)  # dedendum length of tooth
+        racklines = VGroup(fast.repeat(rack.profile(m), 3, PI * m)) 
         # self.add(g.rotate_about_origin(PI / 2).shift(rp * X + (- PI * m - l + 0.5 * lf) * Y).shift(-rp * X))
         self.add(fast.revolution(gear.profile(m, z, interference=True), 2 * PI / z, z).rotate_about_origin(PI / z).shift(-rp * X))
-        self.add(g.rotate_about_origin(PI / 2).shift(rp * X + (- PI * m - l + 0.5 * lf) * Y).shift(-rp * X - (PI * m / 2 * Y)))
+        self.add(racklines.rotate_about_origin(PI / 2).shift(rp * X + (- PI * m + 0.5 * lf) * Y).shift(-rp * X - (PI * m / 2 * Y)))
         # self.add(revolution(gearprofile(m, z, interference=True), 2 * PI / z, z).shift(-rp * X))
-        # self.add(Line(-10 * X, 10 *X))
 
 
 class InvoluteFunction(Scene):

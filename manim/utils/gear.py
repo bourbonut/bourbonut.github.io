@@ -46,17 +46,13 @@ def profile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=False):
         ts = tp - atan2(tp, 1)
         phase = pi / z + 2 * (tp - atan2(tp, 1))
         phase_empty = 2 * pi / z - phase
-        # sl = asin(la * 0.5 / rb)
-        # sl = atan2(la * 0.5 , rb)
-        # sl = atan2(la * 0.5 , rp)
         sl = atan2(la * 0.5, (rp - ka * m))
-        print(rb, rp, 0.5 * phase, la * 0.5)
         f = lambda t1, t2: involute(t1, rb) - interference_curve(
             t2, rp, ka * m, 0.5 * la, phase_empty * 0.5
         )
         J = jacobian_involute(rb, rp, ka * m, 0.5 * la, phase_empty * 0.5)
         t1, t2, t3 = 0.5 * ta, -0.5 * ta, 0
-        for i in range(2):
+        for i in range(8):
             t1, t2, t3 = vec3(t1, t2, t3) - inverse(J(t1, t2)) * f(t1, t2)
 
         side1 = ParametricFunction(lambda x: involute(x, rb), t_range=[t1, ta])
@@ -94,7 +90,7 @@ def profile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=False):
             top,
             bottom,
             i,
-            Line(O, (rp - ka * m) * u(-0.5 * phase_empty + sl)),
+            # Line(O, (rp - ka * m) * u(-0.5 * phase_empty + sl)),
             h,
         ).rotate_about_origin(-phase * 0.5)
         # return VGroup(
