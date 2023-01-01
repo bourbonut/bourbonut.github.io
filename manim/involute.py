@@ -9,6 +9,7 @@ from utils import rack, gear, maths, fast
 X = maths.X
 Y = maths.Y
 
+
 class Test(Scene):
     def construct(self):
         m = 1
@@ -19,10 +20,18 @@ class Test(Scene):
         kf = 1.25
         la = rack.addendum_length(m, alpha, ka)  # addendum length of tooth
         lf = rack.dedendum_length(m, alpha, kf)  # dedendum length of tooth
-        racklines = VGroup(fast.repeat(rack.profile(m), 3, PI * m)) 
+        racklines = VGroup(fast.repeat(rack.profile(m), 3, PI * m))
         # self.add(g.rotate_about_origin(PI / 2).shift(rp * X + (- PI * m - l + 0.5 * lf) * Y).shift(-rp * X))
-        self.add(fast.revolution(gear.profile(m, z, interference=True), 2 * PI / z, z).rotate_about_origin(PI / z).shift(-rp * X))
-        self.add(racklines.rotate_about_origin(PI / 2).shift(rp * X + (- PI * m + 0.5 * lf) * Y).shift(-rp * X - (PI * m / 2 * Y)))
+        self.add(
+            fast.revolution(gear.profile(m, z, interference=True), 2 * PI / z, z)
+            .rotate_about_origin(PI / z)
+            .shift(-rp * X)
+        )
+        self.add(
+            racklines.rotate_about_origin(PI / 2)
+            .shift(rp * X + (-PI * m + 0.5 * lf) * Y)
+            .shift(-rp * X - (PI * m / 2 * Y))
+        )
         # self.add(revolution(gearprofile(m, z, interference=True), 2 * PI / z, z).shift(-rp * X))
 
 
