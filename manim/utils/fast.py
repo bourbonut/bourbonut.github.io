@@ -1,4 +1,4 @@
-from manim import VGroup, Line
+from manim import VGroup, Line, Dot
 from itertools import pairwise, starmap, chain
 
 from .maths import X
@@ -8,6 +8,7 @@ def multilines(points, closed=False):
     return VGroup(
         *chain(
             (starmap(Line, pairwise(points))),
+            (map(lambda p: Dot(p, radius=0.02), points)),
             (Line(points[0], points[-1])) if closed else (),
         )
     )
