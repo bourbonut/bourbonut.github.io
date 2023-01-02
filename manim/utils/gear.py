@@ -5,6 +5,7 @@ from functools import partial
 from collections import namedtuple
 
 from .maths import u, v, O, X, Y, Z, anglebt, rotation
+from . import rack
 
 
 def involute(t, r, t0=0):
@@ -53,8 +54,6 @@ def profile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=False):
     ta = angle_involute(ra, rb)
     tp = angle_involute(rp, rb)
 
-    la = p * 0.5 - 2 * tan(alpha) * ha  # addendum length of tooth
-
     duplicate = (
         lambda obj, angle: obj.copy()
         .apply_matrix(mat3(X, -Y, Z))
@@ -63,6 +62,7 @@ def profile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=False):
 
     if interference:
         Function = namedtuple("Function", ["involute", "interference"])
+        la = rack.addendum_length(m, alpha, ka)
         ts = tp - atan2(tp, 1)
         phase = pi / z + 2 * (tp - atan2(tp, 1))
         phase_empty = 2 * pi / z - phase
