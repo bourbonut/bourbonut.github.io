@@ -56,9 +56,10 @@ def profile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=False):
             t1, t2, t3 = vec3(t1, t2, t3) - inverse(J(t1, t2)) * f(t1, t2)
 
         side1 = ParametricFunction(lambda x: involute(x, rb), t_range=[t1, ta])
+        tmin = la * 0.5 / rp
         interference1 = ParametricFunction(
             lambda t: interference_curve(t, rp, ka * m, 0.5 * la, phase_empty * 0.5),
-            t_range=[t2, 0],
+            t_range=[t2, tmin],
         )
         side2 = side1.copy().apply_matrix(mat3(X, -Y, Z)).rotate_about_origin(phase)
         interference2 = (
@@ -66,7 +67,7 @@ def profile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=False):
         )
         angle_a = ta - atan2(ta, 1)
         top = Arc(ra, angle_a, phase - 2 * angle_a)
-        M = interference_curve(0, rp, ka * m, 0.5 * la, phase_empty * 0.5)
+        M = interference_curve(tmin, rp, ka * m, 0.5 * la, phase_empty * 0.5)
         angle_M = anglebt(M, u(0.5 * phase)) * 2
         bottom = Line(
             M, mat3(u(-2 * pi / z + angle_M), v(-2 * pi / z + angle_M), Z) * M
