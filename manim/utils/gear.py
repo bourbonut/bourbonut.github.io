@@ -1,4 +1,4 @@
-from manim import ParametricFunction, VGroup, Arc, Line, RED, YELLOW
+from manim import ParametricFunction, VGroup, Arc, Line, RED, YELLOW, Circle
 from glm import mat3, vec3, inverse
 from math import sqrt, radians, pi, cos, sin, tan, acos, asin, atan2
 from functools import partial
@@ -46,10 +46,10 @@ def profile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=False):
     ha = m * ka  # adendum height
     hf = m * kf  # deddendum height
     p = pi * m  # step
-    rp = m * z * 0.5
+    rp = pitch_radius(m, z)
     ra = rp + ha
     rf = rp - hf
-    rb = rp * cos(alpha)
+    rb = base_radius(m, z, alpha)
 
     ta = angle_involute(ra, rb)
     tp = angle_involute(rp, rb)
@@ -61,7 +61,6 @@ def profile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=False):
     )
 
     if interference:
-        Function = namedtuple("Function", ["involute", "interference"])
         la = rack.addendum_length(m, alpha, ka)
         ts = tp - atan2(tp, 1)
         phase = pi / z + 2 * (tp - atan2(tp, 1))
@@ -69,7 +68,8 @@ def profile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=False):
         angle_top = ta - atan2(ta, 1)
         tmin = la * 0.5 / rp
 
-        functions = Function(
+        Functions = namedtuple("Functions", ["involute", "interference"])
+        functions = Functions(
             partial(involute, r=rb),
             partial(interference_curve, r=rp, x=ha, y=0.5 * la, t0=phase_empty * 0.5),
         )
@@ -97,39 +97,29 @@ def profile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=False):
         ).rotate_about_origin(-phase * 0.5)
 
     else:
-        tb = 0
         phase = pi / z + 2 * (tp - atan2(tp, 1))
-        side1 = ParametricFunction(lambda x: involute(x, rb), t_range=[tb, ta])
-        side2 = side1.copy().apply_matrix(mat3(X, -Y, Z)).rotate_about_origin(phase)
-        angle_a = ta - atan2(ta, 1)
-        top = ParametricFunction(
-            lambda t: ra * u(t), t_range=[0.96 * angle_a, 1.02 * (phase - angle_a)]
-        )
 
-        small_radius = 0.5 * (rb - rf)
-        segment_after = Line((rf + small_radius) * u(phase), rb * 1.01 * u(phase))
-        segment_before = Line((rf + small_radius) * u(0), rb * 1.01 * u(0))
+        # Involute
+        side = ParametricFunction(partial(involute, r=rb), t_range=[0, ta])
 
-        small_angle = asin(small_radius / rf) * 0.92
-        bottom = ParametricFunction(
-            lambda t: rf * u(t),
-            t_range=[0.98 * (phase + small_angle), 1.02 * (2 * pi / z - small_angle)],
-        )
-        small_center = (rf + small_radius) * X
-        arc_after = ParametricFunction(
-            lambda t: small_center + small_radius * u(t), t_range=[-pi, -pi / 2]
-        ).rotate_about_origin(phase + small_angle)
-        arc_before = ParametricFunction(
-            lambda t: small_center + small_radius * u(t), t_range=[pi / 2, pi]
-        ).rotate_about_origin(-small_angle)
+        # Arc parameters
+        ArcParameters = namedtuple("ArcParameters", ["center", "radius", "angle"])
+        r = 0.5 * (rb - rf)
+        t = -atan2(r, rf + r)
+        arcp = ArcParameters((rf + r) * u(t), r, t)
+        arc = Arc(arcp.radius, -pi + arcp.angle, -pi / 2, arc_center=arcp.center)
+
+        # Joint, top and bottom
+        angle_top = ta - atan2(ta, 1)
+        top = Arc(ra, angle_top, phase - 2 * angle_top)
+        joint = Line(arcp.center + arcp.radius * u(-3 * pi / 2 + arcp.angle), rb * X)
+        M = arcp.center + arcp.radius * u(-pi + arcp.angle)
+        angle_bottom = anglebt(M, u(0.5 * phase)) * 2
+        bottom = Line(M, rotation(-2 * pi / z + angle_bottom) * M)
+
+        # Duplicated objects
+        duplicated_objs = map(partial(duplicate, angle=phase), (side, arc, joint))
 
         return VGroup(
-            side1,
-            side2,
-            top,
-            segment_before,
-            segment_after,
-            arc_after,
-            arc_before,
-            bottom,
+            side, top, arc, joint, bottom, *duplicated_objs
         ).rotate_about_origin(-phase * 0.5)
