@@ -1,4 +1,4 @@
-from manim import ParametricFunction, VGroup, Arc, Line, RED, YELLOW, Circle
+from manim import ParametricFunction, VGroup, Arc, Line, RED, YELLOW, Dot
 from glm import mat3, vec3, inverse
 from math import sqrt, radians, pi, cos, sin, tan, acos, asin, atan2
 from functools import partial
@@ -84,7 +84,6 @@ def profile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=False):
         # Involute and interference curve
         side = ParametricFunction(functions.involute, t_range=[t1, ta])
         interference = ParametricFunction(functions.interference, t_range=[t2, tmin])
-        duplicated_objs = map(partial(duplicate, angle=phase), (side, interference))
 
         # Top and bottom
         top = Arc(ra, angle_top, phase - 2 * angle_top)
@@ -92,8 +91,18 @@ def profile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=False):
         angle_bottom = anglebt(M, u(0.5 * phase)) * 2
         bottom = Line(M, rotation(-2 * pi / z + angle_bottom) * M)
 
+        # Patches
+        top_dot = Dot(ra * u(angle_top), radius=0.02)
+        interference_dot = Dot(functions.interference(t2), radius=0.02)
+        involute_dot = Dot(functions.involute(t1), radius=0.02)
+        bottom_dot = Dot(M, radius=0.02)
+        dots = (top_dot, interference_dot, involute_dot, bottom_dot)
+
+        # Duplicated objects
+        duplicated_objs = map(partial(duplicate, angle=phase), (side, interference) + dots)
+
         return VGroup(
-            side, interference, *duplicated_objs, top, bottom
+            side, interference, *duplicated_objs, top, bottom, *dots
         ).rotate_about_origin(-phase * 0.5)
 
     else:
@@ -117,9 +126,19 @@ def profile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=False):
         angle_bottom = anglebt(M, u(0.5 * phase)) * 2
         bottom = Line(M, rotation(-2 * pi / z + angle_bottom) * M)
 
+        # Patches
+        top_dot = Dot(ra * u(angle_top), radius=0.02)
+        side_dot = Dot(rb * X, radius=0.02)
+        point = arcp.center + arcp.radius * u(-3 * pi / 2 + arcp.angle)
+        joint_dot = Dot(point, radius=0.02)
+        bottom_dot = Dot(M, radius=0.02)
+        dots = (top_dot, side_dot, joint_dot, bottom_dot)
+
         # Duplicated objects
-        duplicated_objs = map(partial(duplicate, angle=phase), (side, arc, joint))
+        duplicated_objs = map(
+            partial(duplicate, angle=phase), (side, arc, joint) + dots
+        )
 
         return VGroup(
-            side, top, arc, joint, bottom, *duplicated_objs
+            side, top, arc, joint, bottom, *duplicated_objs, *dots
         ).rotate_about_origin(-phase * 0.5)
