@@ -1,6 +1,6 @@
 from manim import ParametricFunction, VGroup, Arc, Line, RED, YELLOW, Dot
 from glm import mat3, vec3, inverse
-from math import sqrt, radians, pi, cos, sin, tan, acos, asin, atan2
+from math import sqrt, radians, pi, cos, atan2
 from functools import partial
 from collections import namedtuple
 
@@ -30,6 +30,10 @@ def jacobian_involute(rb, rp, x, y, t0):
     )
 
 
+def angle_step(z):
+    return 2 * pi / z
+
+
 def pitch_radius(m, z):
     return m * z * 0.5
 
@@ -38,21 +42,30 @@ def base_radius(m, z, alpha):
     return pitch_radius(m, z) * cos(alpha)
 
 
+def addendum_radius(m, z, ka):
+    return pitch_radius(m, z) + ka * m
+
+
+def dedendum_radius(m, z, kf):
+    return pitch_radius(m, z) - kf * m
+
+
 def angle_involute(r, rb):
     return sqrt(r * r / (rb * rb) - 1)
 
 
 def profile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=False):
-    ha = m * ka  # adendum height
-    hf = m * kf  # deddendum height
-    p = pi * m  # step
-    rp = pitch_radius(m, z)
-    ra = rp + ha
-    rf = rp - hf
-    rb = base_radius(m, z, alpha)
+    # Parameters
+    ha = m * ka  #                  addendum height
+    hf = m * kf  #                  dedendum height
+    p = pi * m  #                   step
+    rp = pitch_radius(m, z) #       pitch radius
+    ra = rp + ha #                  addendum radius
+    rf = rp - hf #                  dedendum radius
+    rb = base_radius(m, z, alpha) # base radius
 
-    ta = angle_involute(ra, rb)
-    tp = angle_involute(rp, rb)
+    ta = angle_involute(ra, rb) #   addendum angle
+    tp = angle_involute(rp, rb) #   pitch angle
 
     duplicate = (
         lambda obj, angle: obj.copy()
@@ -99,7 +112,9 @@ def profile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=False):
         dots = (top_dot, interference_dot, involute_dot, bottom_dot)
 
         # Duplicated objects
-        duplicated_objs = map(partial(duplicate, angle=phase), (side, interference) + dots)
+        duplicated_objs = map(
+            partial(duplicate, angle=phase), (side, interference) + dots
+        )
 
         return VGroup(
             side, interference, *duplicated_objs, top, bottom, *dots

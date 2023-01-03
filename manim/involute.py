@@ -1,4 +1,3 @@
-from re import I
 from manim import *
 from utils import *
 from glm import *
@@ -8,32 +7,6 @@ from utils import rack, gear, maths, fast
 
 X = maths.X
 Y = maths.Y
-
-
-class Test(Scene):
-    def construct(self):
-        m = 1
-        z = 12
-        rp = m * z * 0.5
-        alpha = radians(20)
-        ka = 1
-        kf = 1.25
-        la = rack.addendum_length(m, alpha, ka)  # addendum length of tooth
-        lf = rack.dedendum_length(m, alpha, kf)  # dedendum length of tooth
-        racklines = VGroup(fast.repeat(rack.profile(m), 3, PI * m))
-        # self.add(g.rotate_about_origin(PI / 2).shift(rp * X + (- PI * m - l + 0.5 * lf) * Y).shift(-rp * X))
-        self.add(
-            fast.revolution(gear.profile(m, z, interference=True), 2 * PI / z, z)
-            .rotate_about_origin(PI / z)
-            .shift(-rp * X)
-        )
-        self.add(
-            racklines.rotate_about_origin(PI / 2)
-            .shift(rp * X + (-PI * m + 0.5 * lf) * Y)
-            .shift(-rp * X - (PI * m / 2 * Y))
-        )
-        # self.add(revolution(gearprofile(m, z, interference=True), 2 * PI / z, z).shift(-rp * X))
-
 
 class InvoluteFunction(Scene):
     def involute(self, t):
@@ -132,32 +105,3 @@ class InvoluteFunction(Scene):
         self.wait(10)
         # func = ParametricFunction(self.involute, t_range=vec3(0., 2.*pi), fill_opacity=0)
         # self.add(func)
-
-
-class Gear(Scene):
-    def construct(self):
-        m = 0.5
-        z = 12
-        p = pi * m
-        d_pitch = m * z
-        d_addendum = d_pitch + 2 * m
-        d_dedendum = d_pitch - 2.5 * m
-        r_pitch = d_pitch * 0.5
-        r_addendum = d_addendum * 0.5
-        r_dedendum = d_dedendum * 0.5
-        z = 12
-        profile = gearprofile(p, z)
-        full_profile = profile.copy()
-        for i in range(12 - 1):
-            full_profile += profile.copy().rotate_about_origin((i + 1) * 2 * pi / z, Z)
-
-        circle_pitch = Circle(r_pitch, color=RED)
-        circle_addendum = DashedVMobject(Circle(r_addendum, color=BLUE))
-        circle_dedendum = DashedVMobject(Circle(r_dedendum, color=BLUE))
-        self.add(full_profile, circle_pitch, circle_addendum, circle_dedendum)
-
-
-class Rack(Scene):
-    def construct(self):
-        m = 0.5
-        self.add(rackprofile(m))

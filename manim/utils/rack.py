@@ -4,12 +4,25 @@ from math import radians, pi, tan
 from .fast import multilines
 
 
+def step(m):
+    return pi * m
+
+
 def addendum_length(m, alpha, ka):
     return pi * m * 0.5 - 2 * tan(alpha) * m * ka
 
 
+def addendum_height(m, ka):
+    return ka * m
+
+
+def dedendum_height(m, kf):
+    return kf * m
+
+
 def dedendum_length(m, alpha, kf):
     return pi * m * 0.5 - 2 * tan(alpha) * m * kf
+
 
 def up2down_length(m, alpha, ka, kf):
     return tan(alpha) * m * (ka + kf)
@@ -22,7 +35,7 @@ def profile(m, alpha=radians(20), ka=1, kf=1.25):
     p = pi * m  #                               step
     la = addendum_length(m, alpha, ka)  #       addendum length of tooth
     lf = dedendum_length(m, alpha, kf)  #       dedendum length of tooth
-    lud = up2down_length(m, alpha, ka, kf) #    length up to down
+    lud = up2down_length(m, alpha, ka, kf)  #   length up to down
     tan_a = tan(alpha)
 
     #    B ____ C
