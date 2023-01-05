@@ -21,7 +21,7 @@ class RackAndGear(Scene):
         lf = rack.dedendum_length(m, alpha, kf)  # dedendum length of tooth
         step = rack.step(m)
         angle_step = gear.angle_step(z)
-        racklines = VGroup(fast.repeat(rack.profile(m), 3, step))
+        racklines = fast.repeat(rack.profile(m), 3, step)
 
         # Visualization 1
         self.add(

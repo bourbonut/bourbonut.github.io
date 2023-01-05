@@ -54,7 +54,7 @@ def angle_involute(r, rb):
     return sqrt(r * r / (rb * rb) - 1)
 
 
-def profile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=False):
+def profile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=True):
     # Parameters
     ha = m * ka  #                  addendum height
     hf = m * kf  #                  dedendum height
