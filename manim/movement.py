@@ -11,6 +11,28 @@ X = maths.X
 Y = maths.Y
 
 
+class CustomMoveAlongPath(Animation):
+    def __init__(
+        self,
+        mobject: Mobject,
+        path: callable,
+        parameter: float,
+        suspend_mobject_updating: bool | None = False,
+        **kwargs,
+    ) -> None:
+        super().__init__(
+            mobject, suspend_mobject_updating=suspend_mobject_updating, **kwargs
+        )
+        self.path = path
+        self.original = self.mobject.copy()
+        self.parameter = parameter
+
+    def interpolate_mobject(self, alpha: float) -> None:
+        t = self.rate_func(alpha) * self.parameter
+        angle = maths.anglebt(self.path(t), maths.X)
+        self.mobject.become(self.original.copy().rotate(t, about_point=ORIGIN).shift(self.path(t)))
+
+
 class GearOnRack(Scene):
     def construct(self):
         m, z, alpha = 1, 8, radians(20)
@@ -51,7 +73,7 @@ class RackOnGear(Scene):
         angle_step = gear.angle_step(z)
 
         rp = gear.pitch_radius(m, z)
-        inv = ParametricFunction(partial(gear.involute, r=rp), t_range=[0, pi])
+        inv = ParametricFunction(partial(gear.involute, r=rp), t_range=[0, pi], color=BLUE)
 
         gearprofile = fast.revolution(
             gear.profile(m, z, alpha, interference=True), angle_step, z
@@ -60,9 +82,10 @@ class RackOnGear(Scene):
 
         rackprofile = fast.repeat(rack.profile(m, alpha), 2 * z, step)
         rackprofile = rackprofile.rotate_about_origin(pi * 0.5).shift(
-            rp * X + (-(0.5 + z) * step + 0.5 * lf) * Y
+            (-(0.5 + z) * step + 0.5 * lf) * Y
         )
+        vg = VGroup(Dot(ORIGIN), rackprofile)
 
         self.add(gearprofile)
-        # self.play(rackprofile.animate.apply_matrix(PI), run_time=2) 
-        self.play(rackprofile.animate.rotate(-PI, axis=OUT, about_point=ORIGIN, about_edge=None), run_time=3) 
+        self.add(inv)
+        self.play(CustomMoveAlongPath(vg, partial(gear.involute, r=rp), pi), run_time=5)
