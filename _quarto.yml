@@ -1,0 +1,17 @@
+project:
+  type: website
+
+website:
+  title: "Science"
+  navbar:
+    right:
+      - about.qmd
+      - icon: github
+        href: https://github.com/bourbonut
+      - icon: linkedin
+        href: https://www.linkedin.com/in/benjamin-bourbon-84a6751b8/ 
+format:
+  html:
+    theme: darkly
+    css: styles.css
+

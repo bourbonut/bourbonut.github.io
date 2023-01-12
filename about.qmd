@@ -1,0 +1,16 @@
+---
+title: "About"
+image: profile.jpg
+about:
+  template: jolla
+  links:
+    - icon: linkedin
+      text: LinkedIn
+      href: https://www.linkedin.com/in/benjamin-bourbon-84a6751b8/ 
+    - icon: github
+      text: Github
+      href: https://github.com/bourbonut
+
+---
+
+About this blog
