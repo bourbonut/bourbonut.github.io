@@ -129,11 +129,11 @@ def gear_information(interference=False):
     return objs.shift(-0.55 * rp * Y)
 
 
-class GearWithInference(Scene):
+class GearWithInterference(Scene):
     def construct(self):
         self.add(gear_information(True))
 
-class GearWithoutInference(Scene):
+class GearWithoutInterference(Scene):
     def construct(self):
         self.add(gear_information(False))
 
