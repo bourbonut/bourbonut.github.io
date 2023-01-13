@@ -21,6 +21,7 @@ def CustomDoubleArrow(start_point, end_point, **kwargs):
 
 class RackAndGear(Scene):
     def construct(self):
+        # Parameters
         m = 1
         z = 8
         alpha = radians(20)
@@ -31,31 +32,25 @@ class RackAndGear(Scene):
         lf = rack.dedendum_length(m, alpha, kf)  # dedendum length of tooth
         step = rack.step(m)
         angle_step = gear.angle_step(z)
+
         racklines = fast.repeat(rack.profile(m), 3, step)
 
-        # Visualization 1
-        self.add(
-            fast.revolution(gear.profile(m, z, interference=True), angle_step, z)
-            .rotate_about_origin(angle_step * 0.5)
-            .shift(-rp * X)
-        )
-        self.add(
-            racklines.rotate_about_origin(pi * 0.5)
-            .shift(rp * X + (-step + 0.5 * lf) * Y)
-            .shift(-rp * X - (step * 0.5 * Y))
-        )
+        # Pitch characteristics
+        pitch_circle = DashedVMobject(Circle(rp, color=YELLOW))
+        pitch_line = DashedLine(O, 3 * step * X, color=YELLOW, dash_length=1)
 
-        # Visualization 2
-        # self.add(
-        #     racklines.rotate_about_origin(pi / 2)
-        #     .shift(rp * X + (-step + 0.5 * lf) * Y)
-        #     .shift(-rp * X)
-        # )
-        # self.add(
-        #     fast.revolution(gear.profile(m, z, interference=False), angle_step, z).shift(
-        #         -rp * X
-        #     )
-        # )
+        self.add(
+            fast.revolution(gear.profile(m, z, interference=False), angle_step, z)
+            .rotate_about_origin(angle_step * 0.5)
+            .shift(-0.5 * rp * X),
+            pitch_circle.shift(-0.5 * rp * X),
+            Dot(-0.5 * rp * X),
+        )
+        offset_y = -1.5 * step + 0.5 * lf
+        self.add(
+            racklines.rotate_about_origin(pi * 0.5).shift(offset_y * Y + 0.5 * rp * X),
+            pitch_line.rotate_about_origin(pi * 0.5).shift(offset_y * Y + 0.5 * rp * X),
+        )
 
 
 def gear_information(interference=False):
@@ -133,9 +128,11 @@ class GearWithInterference(Scene):
     def construct(self):
         self.add(gear_information(True))
 
+
 class GearWithoutInterference(Scene):
     def construct(self):
         self.add(gear_information(False))
+
 
 class Rack(Scene):
     def construct(self):
