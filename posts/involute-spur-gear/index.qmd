@@ -180,15 +180,162 @@ def profile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=True):
 
 Note : for `manim`, see [installation](https://docs.manim.community/en/stable/installation.html)
 
-# Verification with rack
+# Verification with the kinematic between a pinion and a rack
 
 Now, it's time to check if this profile is correct. Remember that a pinion must work on a rack.
 
 Let's see the profile of a rack :
 
-![Rack profile](rack.png)
+![Figure : Rack profile](rack.png)
 
 The yellow line denotes the pitch line of the rack. $h_a$ and $h_f$ are computed in the same way as a gear.
 
-<!-- # Kinematic of spur gear -->
-<!-- Insert rack + gear image -->
+The pitch circle of the pinion must roll the pitch line of the rack :
+
+![Figure : Contact between rack and pinion](rack_and_gear.png)
+
+Do you see any interference ? Let's see closer :
+
+![Animation : Path of a rack's tooth on the pinion](CloseRackOnGear.mp4)
+
+Now, we clearly see that the rack is in interference with the pinion. Then we must find the red function of the previous animation.
+You can notice that the movement of the rack of a point on the pitch line and center based on the tooth, has a trajectory of the involute function.
+
+Thus, the interference curve is a translated involute function according to the position of the corners of the rack's tooth.
+In other words, we define $\vec \phi(t, r, t_0, X, Y) $ as the interference curve such as :
+$$
+\vec \phi(t, r, t_0, X, Y) = \vec \theta(t, r, t_0) - X \vec u(t - t_0) + Y \vec v(t - t_0)
+$$
+where $X$ and $Y$ are determined based the dimensions of the rack, as the distances $X$ and $Y$ from the pitch line dot to one corner.
+
+Based on the figure *Rack profile*, we can find the following relations :
+$$
+X = h_a \quad \text{and} \quad Y = \frac{\frac{\pi m}{2} - 2 m k_a \tan(\alpha)}{2}
+$$
+
+Note we have chosen the left corner of the rack's tooth.
+
+Next we must find the intersection between $\vec \theta(t_1, r_b, t_{01})$ and $\vec \phi(t_2, r_p, t_{02}, X, Y)$ where $t_1$ and $t_2$ are the unknown variables.
+The equation to get the intersection is to hard to solve manually. Thus we are going to use the [Newton's Method](https://en.wikipedia.org/wiki/Newton%27s_method) to solve this problem.
+
+The function that we want to optimize is defined as :
+$$
+\vec f(t_1, t_2) = \vec \theta(t_1, r_b, t_{01}) - \vec \phi(t_2, r_p, t_{02}, X, Y)
+$$
+Note this function is a 2D vector.
+
+Thus, its derivative is the jacobian matrix :
+$$
+J(t_1, t_2)
+= \begin{bmatrix}
+\frac{\partial \vec f}{\partial t_1} \cdot \vec x & \frac{\partial \vec f}{\partial t_2} \cdot \vec x \\
+\frac{\partial \vec f}{\partial t_1} \cdot \vec y & \frac{\partial \vec f}{\partial t_2} \cdot \vec y
+\end{bmatrix}
+= \begin{bmatrix}
+\vec \theta'(t_1, r_b, t_{01}) & -\vec \phi'(t_2, r_p, t_{02}, X, Y)
+\end{bmatrix}
+$$
+To get quickly derivatives of these functions, we start by computing the derivatives of $\vec u(t - t_0)$ and $\vec v(t - t_0)$ :
+$$
+\vec u'(t - t_0) = \vec v(t - t_0) \quad \text{and} \quad \vec v'(t - t_0) = -\vec u(t - t_0)
+$$
+
+Thus, we deduce the following derivatives :
+$$
+\boxed{
+    \begin{align}
+        \vec \theta'(t_1, r_b, t_{01}) & = r_b t_1 \vec u(t - t_{01}) \\
+        \vec \phi'(t_2, r_p, t_{02}, X, Y) & = \vec \theta'(t_2, r_p, t_{02}) - X \vec v(t - t_{02}) - Y \vec u(t - t_{02})
+    \end{align}
+}
+$$
+Now, all elements are found to be exploited in order to get a new profile.
+
+## Code
+
+```python
+from collections import namedtuple
+from functools import partial
+from manim import *
+
+def profile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=True):
+    # Parameters
+    ha = m * ka  #                  addendum height
+    hf = m * kf  #                  dedendum height
+    p = pi * m  #                   step
+    rp = pitch_radius(m, z) #       pitch radius
+    ra = rp + ha #                  addendum radius
+    rf = rp - hf #                  dedendum radius
+    rb = base_radius(m, z, alpha) # base radius
+
+    ta = angle_involute(ra, rb) #   addendum angle
+    tp = angle_involute(rp, rb) #   pitch angle
+
+    duplicate = (
+        lambda obj, angle: obj.copy()
+        .apply_matrix(mat3(X, -Y, Z))
+        .rotate_about_origin(angle)
+    )
+
+    la = rack.addendum_length(m, alpha, ka)
+    ts = tp - atan2(tp, 1)
+    phase = pi / z + 2 * (tp - atan2(tp, 1))
+    phase_empty = 2 * pi / z - phase
+    angle_top = ta - atan2(ta, 1)
+    tmin = la * 0.5 / rp
+
+    Functions = namedtuple("Functions", ["involute", "interference"])
+    functions = Functions(
+        partial(involute, r=rb),
+        partial(interference_curve, r=rp, x=ha, y=0.5 * la, t0=phase_empty * 0.5),
+    )
+
+    # Newton method
+    f = lambda t1, t2: functions.involute(t1) - functions.interference(t2)
+    J = jacobian_involute(rb, rp, ha, 0.5 * la, phase_empty * 0.5)
+    t1, t2, t3 = 0.5 * ta, -0.5 * ta, 0
+    for i in range(8):
+        t1, t2, t3 = vec3(t1, t2, t3) - inverse(J(t1, t2)) * f(t1, t2)
+
+    # Involute and interference curve
+    side = ParametricFunction(functions.involute, t_range=[t1, ta])
+    interference = ParametricFunction(functions.interference, t_range=[t2, tmin])
+
+    # Top and bottom
+    top = Arc(ra, angle_top, phase - 2 * angle_top)
+    M = functions.interference(tmin)
+    angle_bottom = anglebt(M, u(0.5 * phase)) * 2
+    bottom = Line(M, rotation(-2 * pi / z + angle_bottom) * M)
+
+    # Patches
+    top_dot = Dot(ra * u(angle_top), radius=0.02)
+    interference_dot = Dot(functions.interference(t2), radius=0.02)
+    involute_dot = Dot(functions.involute(t1), radius=0.02)
+    bottom_dot = Dot(M, radius=0.02)
+    dots = (top_dot, interference_dot, involute_dot, bottom_dot)
+
+    # Duplicated objects
+    duplicated_objs = map(
+        partial(duplicate, angle=phase), (side, interference) + dots
+    )
+
+    return VGroup(
+        side, interference, *duplicated_objs, top, bottom, *dots
+    ).rotate_about_origin(-phase * 0.5)
+```
+
+And the gear profile :
+
+![Figure : Gear profile with interference](gear_with_interference.png)
+
+Note the closest radius to the pinion's center is greater than the dedendum radius due to the interference curve.
+
+Let's see the rack movement now :
+
+![Animation : Rack moving around the pinion](RackOnGear.mp4)
+
+# Conclusion
+
+That's it! Now you are able to make a correct spur pinion that follows the kinematic rules between rack and itself.
+
+![Animation : Gear and Rack mechanism](GearOnRack.mp4)
