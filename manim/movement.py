@@ -56,9 +56,9 @@ class GearOnRack(Scene):
         gearprofile = gearprofile.rotate_about_origin(angle_step * 0.5).shift(-rp * X)
 
         self.play(
-            Rotate(gearprofile, about_point=-rp * X, angle=angle_step),
-            rackprofile.animate.shift(step * Y),
-            run_time=10,
+            Rotate(gearprofile, about_point=-rp * X, angle=2 * angle_step),
+            rackprofile.animate.shift(2 * step * Y),
+            run_time=5,
             run_func=linear,
         )
 
