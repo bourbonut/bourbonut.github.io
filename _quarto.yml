@@ -2,7 +2,7 @@ project:
   type: website
 
 website:
-  title: "Science"
+  title: "Blog"
   navbar:
     right:
       - about.qmd
@@ -12,6 +12,5 @@ website:
         href: https://www.linkedin.com/in/benjamin-bourbon-84a6751b8/ 
 format:
   html:
-    theme: darkly
-    css: styles.css
+    theme: [darkly, theme.scss]
 

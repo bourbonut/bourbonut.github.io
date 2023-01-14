@@ -1,6 +1,6 @@
 ---
-title: "About"
-image: profile.jpg
+title: "Benjamin Bourbon"
+image: https://avatars.githubusercontent.com/u/78030392?s=400&u=b27b7209ae4016d8eb977c8a0b634e64bf6a3849&v=4 
 about:
   template: jolla
   links:
@@ -13,4 +13,8 @@ about:
 
 ---
 
-About this blog
+I'm a young engineer with a specialization in High Performance Computing and Artificial Intelligence.
+
+I develop currently a CAD library [pymadcad](https://github.com/jimy-byerley/pymadcad/) with a friend.
+
+This blog aims to share some personal work which I find useful.

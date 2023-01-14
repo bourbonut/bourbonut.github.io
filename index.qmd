@@ -1,5 +1,5 @@
 ---
-title: "Science"
+title: "In progress"
 listing:
   contents: posts
   sort: "date desc"
