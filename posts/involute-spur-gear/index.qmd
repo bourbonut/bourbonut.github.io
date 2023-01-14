@@ -258,6 +258,30 @@ from collections import namedtuple
 from functools import partial
 from manim import *
 
+def involute(t, r, t0=0):
+    return r * (u(t - t0) - t * v(t - t0))
+
+
+def interference_curve(t, r, x, y, t0):
+    return involute(t, r, t0) - x * u(t - t0) + y * v(t - t0)
+
+
+def derived_involute(t, r, t0):
+    return r * t * u(t - t0)
+
+
+def derived_interference_curve(t, r, x, y, t0):
+    return derived_involute(t, r, t0) - x * v(t - t0) - y * u(t - t0)
+
+
+def jacobian_involute(rb, rp, x, y, t0):
+    return lambda t1, t2: mat3(
+        derived_involute(t1, rb, t0), -derived_interference_curve(t2, rp, x, y, t0), Z
+    )
+
+def angle_involute(r, rb):
+    return sqrt(r * r / (rb * rb) - 1)
+
 def profile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=True):
     # Parameters
     ha = m * ka  #                  addendum height
