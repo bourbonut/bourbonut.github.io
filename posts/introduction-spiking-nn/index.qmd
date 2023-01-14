@@ -1,0 +1,9 @@
+---
+title: "Introduction to Spiking Neural Networks"
+author: "Benjamin Bourbon"
+date: "2023-01-14"
+categories: [artificial intelligence]
+image: "https://miro.medium.com/max/720/1*dOv2a1ctNrHDo8Zks30Bbw.webp"
+---
+
+In progress
