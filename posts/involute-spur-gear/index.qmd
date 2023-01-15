@@ -276,7 +276,9 @@ def derived_interference_curve(t, r, x, y, t0):
 
 def jacobian_involute(rb, rp, x, y, t0):
     return lambda t1, t2: mat3(
-        derived_involute(t1, rb, t0), -derived_interference_curve(t2, rp, x, y, t0), Z
+        derived_involute(t1, rb, t0), 
+        -derived_interference_curve(t2, rp, x, y, t0),
+        Z,
     )
 
 def angle_involute(r, rb):
@@ -317,6 +319,7 @@ def profile(m, z, alpha=radians(20), ka=1, kf=1.25, interference=True):
     # Newton method
     f = lambda t1, t2: functions.involute(t1) - functions.interference(t2)
     J = jacobian_involute(rb, rp, ha, 0.5 * la, phase_empty * 0.5)
+    # t3 is not used, but exists because 3D vectors
     t1, t2, t3 = 0.5 * ta, -0.5 * ta, 0
     for i in range(8):
         t1, t2, t3 = vec3(t1, t2, t3) - inverse(J(t1, t2)) * f(t1, t2)
