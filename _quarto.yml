@@ -12,5 +12,5 @@ website:
         href: https://www.linkedin.com/in/benjamin-bourbon-84a6751b8/ 
 format:
   html:
-    theme: [darkly, theme.scss]
+    theme: [theme.scss]
 
