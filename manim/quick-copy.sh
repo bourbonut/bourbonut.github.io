@@ -1,3 +1,8 @@
+# manim -pqm involute.py -a
+# manim -pqm movement.py -a
+# manim -pqm force.py -a
+# manim -pqm rack_gear.py -a
+
 PRJROOT=".."
 MEDIA=$PRJROOT/manim/media
 POST=$PRJROOT/posts/involute-spur-gear
