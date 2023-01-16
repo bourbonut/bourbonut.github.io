@@ -202,7 +202,7 @@ Now, we clearly see that the rack is in interference with the pinion. Then we mu
 You can notice that the movement of the rack of a point on the pitch line and center based on the tooth, has a trajectory of the involute function.
 
 Thus, the interference curve is a translated involute function according to the position of the corners of the rack's tooth.
-In other words, we define $\vec \phi(t, r, t_0, X, Y) $ as the interference curve such as :
+In other words, we define $\vec \phi(t, r, t_0, X, Y)$ as the interference curve such as :
 $$
 \vec \phi(t, r, t_0, X, Y) = \vec \theta(t, r, t_0) - X \vec u(t - t_0) + Y \vec v(t - t_0)
 $$
