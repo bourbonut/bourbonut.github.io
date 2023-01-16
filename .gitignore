@@ -2,3 +2,5 @@ __pycache__/
 media/
 /.quarto/
 _site/
+posts/*/*.png
+posts/*/*.mp4
