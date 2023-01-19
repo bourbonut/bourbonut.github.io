@@ -3,7 +3,7 @@ title: "Introduction to Spiking Neural Networks"
 author: "Benjamin Bourbon"
 date: "2023-01-14"
 categories: [artificial intelligence]
-<!-- image: "https://miro.medium.com/max/720/1*dOv2a1ctNrHDo8Zks30Bbw.webp" -->
+image: "https://miro.medium.com/max/720/1*dOv2a1ctNrHDo8Zks30Bbw.webp"
 ---
 
 # Spiking neural networks for time series predictions
@@ -29,7 +29,7 @@ This value in the neuron can change based on the mathematical model of the neuro
 If the value is higher than a threshold, the neuron sends only one impulse for each neuron downstream of it.
 Finally, the value of the neuron is set under his mean value. After some time, the value of the neuron is back to the mean value.
 
-[Animation : Impulse of SNN](https://cnvrg.io/wp-content/uploads/2021/05/snn.gif)
+![Animation : Impulse of SNN](https://cnvrg.io/wp-content/uploads/2021/05/snn.gif)
 
 ## Several models
 
@@ -215,14 +215,10 @@ It is a unsupervised learning mecanism. The training is realized layer by layer,
 
 $$
 \Delta \omega_{ij} =
-
 \left\{
-
 \begin{array}{c}
-
 a^+ \omega_{ij}(1 - \omega_{ij}), & si & t_j - t_i \le 0 \\
 a^- \omega_{ij}(1 - \omega_{ij}), & si & t_j - t_i > 0
-
 \end{array}
 \right.
 $$
