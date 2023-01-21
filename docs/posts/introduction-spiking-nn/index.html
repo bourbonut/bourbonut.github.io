@@ -61,6 +61,7 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 </head>
 
@@ -142,9 +143,294 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<p>In progress</p>
+<section id="spiking-neural-networks-for-time-series-predictions" class="level1">
+<h1>Spiking neural networks for time series predictions</h1>
+<p>Deep neural networks (<strong>DNN</strong>) are certainly one of the major advances of the last decades. On one hand, their performance comes from the computation complexity and the energy consumption. On the other hand, SNN offer models with cheaper computation complexity and a budgetary reduction of the energy consumption. SNN bring excellent performances along for <em>task classification</em> such as on images and sound. This network is often found in time series processing with their ability of classification.</p>
+<section id="what-are-spiking-neural-networks" class="level2">
+<h2 class="anchored" data-anchor-id="what-are-spiking-neural-networks">What are Spiking neural networks ?</h2>
+<p>SNN have a different approach on information transmission from standard neural networks. They try to imitate biological neural networks. Instead of changing the values over time, SNN work on discrete events which are produced in specific moments. They receive peak series as input and produce time series as output.</p>
+</section>
+<section id="overview-of-spiking-neural-networks" class="level2">
+<h2 class="anchored" data-anchor-id="overview-of-spiking-neural-networks">Overview of Spiking neural networks</h2>
+<p>For every time-step, each neuron has some values which are analogous to a electric potential of biological neurons. This value in the neuron can change based on the mathematical model of the neuron. If the value is higher than a threshold, the neuron sends only one impulse for each neuron downstream of it. Finally, the value of the neuron is set under his mean value. After some time, the value of the neuron is back to the mean value.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><video src="Impulse.mp4" class="img-fluid" controls=""><a href="Impulse.mp4">Video</a></video></p>
+<p></p><figcaption class="figure-caption">Animation : Impulse of SNN</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="several-models" class="level2">
+<h2 class="anchored" data-anchor-id="several-models">Several models</h2>
+<p>SNN are built on the mathematical descriptions of biological neurons. There are two groups of methods which are used to model SNN :</p>
+<ul>
+<li><p>models based on conductance which describe how actions in neurons are initiated and spread</p>
+<ol type="1">
+<li><a href="https://en.wikipedia.org/wiki/Hodgkin%E2%80%93Huxley_model">Hodgkin-Huxley model</a></li>
+<li><a href="https://en.wikipedia.org/wiki/FitzHugh%E2%80%93Nagumo_model">FitzHugh–Nagumo model</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Morris%E2%80%93Lecar_model">Morris–Lecar model</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Hindmarsh%E2%80%93Rose_model">Hindmarsh–Rose model</a></li>
+<li><a href="https://www.izhikevich.org/publications/spikes.htm">Izhikevich model</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Cable_theory">Cable theory</a></li>
+</ol></li>
+<li><p>models with a threshold which generate a spike for a given threshold</p>
+<ol type="1">
+<li><a href="https://en.wikipedia.org/wiki/Biological_neuron_model#Perfect_Integrate-and-fire">Perfect Integrate-and-fire</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Biological_neuron_model#Perfect_Integrate-and-fire">Leaky Integrate-and-fire</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Biological_neuron_model#Adaptive_integrate-and-fire">Adaptive Integrate-and-fire</a></li>
+</ol></li>
+</ul>
+</section>
+</section>
+<section id="leaky-integrate-and-fire" class="level1">
+<h1>Leaky Integrate-and-fire</h1>
+<p>We are going to understand how the model <em>Leaky Integrate-and-fire</em> works. We start with its theoretical circuit. There are two cases to study and we need to find their equation and solution: 1. <span class="math inline">\(I \ne 0\)</span> 2. <span class="math inline">\(I = 0\)</span> where <span class="math inline">\(I\)</span> denotes the intensity of the current.</p>
+<section id="case-where-i-ne-0" class="level2">
+<h2 class="anchored" data-anchor-id="case-where-i-ne-0">Case where <span class="math inline">\(I \ne 0\)</span></h2>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="rc-circuit.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure : RC circuit</figcaption><p></p>
+</figure>
+</div>
+<p>We apply the Kirchhoff’s current law on the green point : <span class="math display">\[
+I_e = I_{s_1} + I_{s_2}
+\]</span> We use the characteristic relation of a resistor (Ohm’s law): <span class="math display">\[
+U = RI
+\]</span></p>
+<p>And the characteristic relation of a capacitor : <span class="math display">\[
+I = C \times \frac {dU}{dt}
+\]</span></p>
+<p>We represent the intensity as <span class="math inline">\(I(t)\)</span> and the tension as <span class="math inline">\(V_m(t)\)</span>. Thus we get the following relation: <span class="math display">\[
+I(t) = \frac{V_m(t)}{R_m} + C_m \frac{dV(m)}{dt}
+\]</span> <span class="math display">\[
+\boxed{C_m \frac{dV(m)}{dt} = I(t) - \frac{V_m(t)}{R_m}}
+\]</span></p>
+</section>
+<section id="resolution-of-the-differential-equation" class="level2">
+<h2 class="anchored" data-anchor-id="resolution-of-the-differential-equation">Resolution of the differential equation</h2>
+<section id="homogeneous-solution" class="level3">
+<h3 class="anchored" data-anchor-id="homogeneous-solution">Homogeneous solution</h3>
+<p><span class="math display">\[
+\frac{dV(m)}{dt} + \frac{V_m(t)}{R_m C_m} = 0
+\]</span></p>
+<p>We set <span class="math inline">\(\tau = R_m C_m\)</span>. Then we get: <span class="math display">\[
+V_m(t) = A e^{\frac{-t}{\tau}}
+\]</span> where <span class="math inline">\(A\)</span> is the integration constant of the problem.</p>
+<section id="particular-solution" class="level4">
+<h4 class="anchored" data-anchor-id="particular-solution">Particular solution</h4>
+<p>We assume that <span class="math inline">\(I(t)\)</span> is constant. The particular solution has the same form of the second member of the equation. In other words, <span class="math inline">\(\frac{dV(m)}{dt} = 0\)</span>.</p>
+<p><span class="math display">\[
+\implies V_m(t) = R_m I(t)
+\]</span></p>
+</section>
+<section id="general-solution" class="level4">
+<h4 class="anchored" data-anchor-id="general-solution">General solution</h4>
+<p><span class="math display">\[
+V_m(t) = A e^{\frac{-t}{\tau}} + R_m I(t)
+\]</span></p>
+<p>We assume that <span class="math inline">\(V_m(0^+) = V_m(0^-) = 0\)</span>. Thus, we get: <span class="math display">\[
+A + R_m I = 0 \iff A = - R_m I
+\]</span></p>
+<p>So:</p>
+<p><span class="math display">\[
+\boxed{V_m(t) = R_m I(1 - e^{\frac{-t}{\tau}})}
+\]</span></p>
+</section>
+</section>
+</section>
+<section id="calculation-of-the-firing-frequency" class="level2">
+<h2 class="anchored" data-anchor-id="calculation-of-the-firing-frequency">Calculation of the firing frequency</h2>
+<p>The model can become more precise by introducing a <em>refractory</em> time in which the neuron can not be discharged. We are interesting to evaluate the frequency when <span class="math inline">\(I &gt; I_{th}\)</span> (when <span class="math inline">\(V_m(t)\)</span> is constant, <span class="math inline">\(I_{th} = \frac{V_{th}}{R_m}\)</span>): <span class="math display">\[
+\begin{align}
+         &amp; V_{th} = R_m I(1 - e^{\frac{-(t - t_{ref})}{\tau}}) \\
+    \iff &amp; e^{\frac{-(t - t_{ref})}{\tau}} = 1 - \frac{V_{th}}{I R_m} \\
+    \iff &amp; \frac{-(t - t_{ref})}{\tau} = \log{(1 - \frac{V_{th}}{I R_m})} \\
+    \iff &amp; t = t_{ref} - \tau \log{(1 - \frac{V_{th}}{I R_m})}
+\end{align}
+\]</span></p>
+<p>Then, we can define the firing frequency with the inverse of the total gap between the impulses (including the down-time). The firing frequency is then :</p>
+<p><span class="math display">\[
+\boxed{
+    f(I) = \left\{\begin{array}{ll}
+    0, &amp; I \le I_{th} \\
+    \left[t_{ref} - \tau \log{\left(1 - \frac{V_{th}}{I R_m}\right)}\right]^{-1}, &amp; I &gt; I_{th}
+    \end{array}\right.
+}
+\]</span></p>
+<section id="case-where-i-0" class="level3">
+<h3 class="anchored" data-anchor-id="case-where-i-0">Case where <span class="math inline">\(I = 0\)</span></h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="rc-circuit.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure : RC Circuit</figcaption><p></p>
+</figure>
+</div>
+<p>We apply the Kirchhoff’s current law on the green point : <span class="math display">\[
+I_{s_1} + I_{s_2} = 0
+\]</span></p>
+<p>We get the following relation : <span class="math display">\[
+\frac{V_m(t)}{R_m} + C_m \frac{dV(m)}{dt} = 0
+\]</span> <span class="math display">\[
+\boxed{\frac{dV(m)}{dt} + \frac{V_m(t)}{\tau} = 0}
+\]</span></p>
+<p>with <span class="math inline">\(\tau = R_m C_m\)</span></p>
+</section>
+<section id="solution-of-the-differential-equation" class="level3">
+<h3 class="anchored" data-anchor-id="solution-of-the-differential-equation">Solution of the differential equation</h3>
+<p><span class="math display">\[
+V_m(t) = A e^{\frac{-t}{\tau}}
+\]</span></p>
+<p>where <span class="math inline">\(A\)</span> is the integration constant of the problem.</p>
+<p>We assume <span class="math inline">\(V_m(0) = I R_m\)</span>. Thus : <span class="math display">\[
+A = I R_m
+\]</span></p>
+<p>We get then :</p>
+<p><span class="math display">\[
+\boxed{V_m(t) = I R_m e^{\frac{-t}{\tau}}}
+\]</span></p>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>We recall that <span class="math inline">\(\tau\)</span> is characterized of the duration which makes the start-up level to disappear to be replaced by the permanent permanent. The permanent level is reached after several <span class="math inline">\(\tau\)</span> (<span class="math inline">\(\approx 5 \tau\)</span>). We can do the analogy <span class="math inline">\(V_m\)</span>, the tension of bounds of the cellular membrane and <span class="math inline">\(R_m\)</span> the membrane resistance.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="impulse.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Impulse</figcaption><p></p>
+</figure>
+</div>
+<p>Benefits - the model will not keep an increase of the tension for ever contrary to other models without leak where it is kept until the appearance of a new impulse.</p>
+<p>Drawbacks - the model does not take into account the neuronal adaptation, so that it can not describe spike series.</p>
+</section>
+<section id="architecture-of-a-snn" class="level2">
+<h2 class="anchored" data-anchor-id="architecture-of-a-snn">Architecture of a SNN</h2>
+<p>Even if SNN have an unique concept, they stay a neural network. We can find :</p>
+<ol type="1">
+<li><a href="https://en.wikipedia.org/wiki/Feedforward_neural_network">Feedforward Neural Network</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Recurrent_neural_network">Recurrent Neural Network</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Synfire_chain">Synfire chain</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Reservoir_computing">Reservoir computing</a></li>
+</ol>
+</section>
+</section>
+<section id="how-to-train-a-spiking-neural-network" class="level1">
+<h1>How to train a Spiking Neural Network ?</h1>
+<p>Unfortunately, still today, there is no efficient supervised learning method which can train a SNN. Operations of SNN can not allow the usage of classical learning methods which are appropriated for a traditional neural network. The learning method for SNN can be a tough task.</p>
+<section id="spike-timing-dependent-plasticity-stdp" class="level2">
+<h2 class="anchored" data-anchor-id="spike-timing-dependent-plasticity-stdp">Spike-Timing-Dependent Plasticity (STDP)</h2>
+<p>It is a unsupervised learning mechanism. The training is realized layer by layer, in other words, the training of the current layer is made when the training of the previous layer is finished. Neurons of the layer compete with each other and those which fire quickly, trigger a STDP and learn from inputs:</p>
+<p><span class="math display">\[
+\Delta \omega_{ij} =
+\left\{
+\begin{array}{c}
+a^+ \omega_{ij}(1 - \omega_{ij}), &amp; si &amp; t_j - t_i \le 0 \\
+a^- \omega_{ij}(1 - \omega_{ij}), &amp; si &amp; t_j - t_i &gt; 0
+\end{array}
+\right.
+\]</span> where <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> respectively refer at the index of postsynaptic neurons and presynaptic neurons, <span class="math inline">\(t_i\)</span> and t_j$ are the time related of spikes, <span class="math inline">\(\Delta \omega_{ij}\)</span> is the modification of synaptic weights and <span class="math inline">\(a^+\)</span> and <span class="math inline">\(a^-\)</span> are two specific learning rates.</p>
+<p>We measure the learning convergence of the <span class="math inline">\(l\)</span>-nth layer under the shape :</p>
+<p><span class="math display">\[
+C_l = \sum_f \sum_i \frac{\omega_{f,i}(1 - \omega_{f,i})}{n_\omega}
+\]</span></p>
+<p>where <span class="math inline">\(C_l\)</span> tends to <span class="math inline">\(0\)</span> if each of synaptic weights converge to <span class="math inline">\(0\)</span> or <span class="math inline">\(1\)</span>. Therefore, we stop the <span class="math inline">\(l\)</span>-nth layer learning when <span class="math inline">\(C_l\)</span> is enough close to <span class="math inline">\(0\)</span> (i.e.&nbsp;<span class="math inline">\(C_l &lt; 0.01\)</span>).</p>
+</section>
+</section>
+<section id="scope-for-snn" class="level1">
+<h1>Scope for SNN</h1>
+<ul>
+<li>Prosthetist : vision and auditive neuroprosthesis</li>
+<li>Robotics : <a href="https://www.braincorp.com/">Brain Corporation</a> develop robots using SNN et <a href="https://en.wikipedia.org/wiki/SyNAPSE">SyNAPSE</a> develop processors and neuromorphic systems.</li>
+<li>Computing Vision : digital neuroprocesseur <a href="https://en.wikipedia.org/wiki/Cognitive_computer#IBM_TrueNorth_chip">IBM TrueNorth</a> includes millions of programmable neurons and 256 millions of programmable synapses to simulate the operation of neurons of vision cortex.</li>
+<li>Telecommunication : Qualcomm is actively on the possibility to integrate SNN in telecommunication devices.</li>
+</ul>
+</section>
+<section id="some-results" class="level1">
+<h1>Some results</h1>
+<table class="table">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 28%">
+<col style="width: 15%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Architecture</th>
+<th>Neural Coding</th>
+<th>Learning-type</th>
+<th>Learning-rule</th>
+<th>Accuracy (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Dendritic neurons</td>
+<td>Rate-based</td>
+<td>Supervised</td>
+<td>Morphology learning</td>
+<td>90.3</td>
+</tr>
+<tr class="even">
+<td>Convultional SNN</td>
+<td>Spike-based</td>
+<td>Supervised</td>
+<td>Tempotron rule</td>
+<td>91.3</td>
+</tr>
+<tr class="odd">
+<td>Two layer network</td>
+<td>Spike-based</td>
+<td>Unsupervised</td>
+<td>STDP</td>
+<td>93.5</td>
+</tr>
+<tr class="even">
+<td>Spiking RBM</td>
+<td>Rate-based</td>
+<td>Supervised</td>
+<td>Contrastive divergence</td>
+<td>94.1</td>
+</tr>
+<tr class="odd">
+<td>Two layer network</td>
+<td>Spike-based</td>
+<td>Unsupervised</td>
+<td>STDP</td>
+<td>95.0</td>
+</tr>
+<tr class="even">
+<td>Convultional SNN</td>
+<td>Rate-based</td>
+<td>Supervised</td>
+<td>Back-propagation</td>
+<td>99.1</td>
+</tr>
+<tr class="odd">
+<td>Proposed SDNN</td>
+<td>Spike-based</td>
+<td>Unsupervised</td>
+<td>STDP</td>
+<td>98.4</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="conclusion-1" class="level1">
+<h1>Conclusion</h1>
+<p>Contrary to classical neural networks where the output is a modulation of the signal intensity (activation function), the output is immediate, here, we apply a modulation over time on SNN where the output is an accumulation of impulses over time. To train a SNN, we must apply new learning methods. SNN are high-performance for vocal recognition or computer vision.</p>
+</section>
+<section id="references" class="level1">
+<h1>References</h1>
+<ul>
+<li><p><a href="https://arxiv.org/pdf/1611.01421.pdf">STDP-based-spiking-deep-convolutional-neural-networks-for-object-recognition</a></p></li>
+<li><p><a href="https://cnvrg.io/spiking-neural-networks/">Basic-guide-to-SNN-for-DL</a></p></li>
+<li><p><a href="https://en.wikipedia.org/wiki/Biological_neuron_model#Leaky_integrate-and-fire">Leaky-integrate-and-fire</a></p></li>
+</ul>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

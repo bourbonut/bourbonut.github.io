@@ -25,7 +25,7 @@
     "href": "posts/introduction-spiking-nn/index.html",
     "title": "Introduction to Spiking Neural Networks",
     "section": "",
-    "text": "In progress"
+    "text": "Deep neural networks (DNN) are certainly one of the major advances of the last decades. On one hand, their performance comes from the computation complexity and the energy consumption. On the other hand, SNN offer models with cheaper computation complexity and a budgetary reduction of the energy consumption. SNN bring excellent performances along for task classification such as on images and sound. This network is often found in time series processing with their ability of classification.\n\n\nSNN have a different approach on information transmission from standard neural networks. They try to imitate biological neural networks. Instead of changing the values over time, SNN work on discrete events which are produced in specific moments. They receive peak series as input and produce time series as output.\n\n\n\nFor every time-step, each neuron has some values which are analogous to a electric potential of biological neurons. This value in the neuron can change based on the mathematical model of the neuron. If the value is higher than a threshold, the neuron sends only one impulse for each neuron downstream of it. Finally, the value of the neuron is set under his mean value. After some time, the value of the neuron is back to the mean value.\n\n\nVideo\nAnimation : Impulse of SNN\n\n\n\n\n\nSNN are built on the mathematical descriptions of biological neurons. There are two groups of methods which are used to model SNN :\n\nmodels based on conductance which describe how actions in neurons are initiated and spread\n\nHodgkin-Huxley model\nFitzHugh–Nagumo model\nMorris–Lecar model\nHindmarsh–Rose model\nIzhikevich model\nCable theory\n\nmodels with a threshold which generate a spike for a given threshold\n\nPerfect Integrate-and-fire\nLeaky Integrate-and-fire\nAdaptive Integrate-and-fire"
   },
   {
     "objectID": "about.html",
@@ -40,5 +40,54 @@
     "title": "In progress",
     "section": "",
     "text": "Introduction to Spiking Neural Networks\n\n\n\n\n\n\n\nartificial intelligence\n\n\n\n\n\n\n\n\n\n\n\nJan 14, 2023\n\n\nBenjamin Bourbon\n\n\n\n\n\n\n  \n\n\n\n\nSpur Tooth Profile\n\n\n\n\n\n\n\nmechanic\n\n\n\n\n\n\n\n\n\n\n\nJan 8, 2023\n\n\nBenjamin Bourbon\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "posts/introduction-spiking-nn/index.html#case-where-i-ne-0",
+    "href": "posts/introduction-spiking-nn/index.html#case-where-i-ne-0",
+    "title": "Introduction to Spiking Neural Networks",
+    "section": "Case where \\(I \\ne 0\\)",
+    "text": "Case where \\(I \\ne 0\\)\n\n\n\nFigure : RC circuit\n\n\nWe apply the Kirchhoff’s current law on the green point : \\[\nI_e = I_{s_1} + I_{s_2}\n\\] We use the characteristic relation of a resistor (Ohm’s law): \\[\nU = RI\n\\]\nAnd the characteristic relation of a capacitor : \\[\nI = C \\times \\frac {dU}{dt}\n\\]\nWe represent the intensity as \\(I(t)\\) and the tension as \\(V_m(t)\\). Thus we get the following relation: \\[\nI(t) = \\frac{V_m(t)}{R_m} + C_m \\frac{dV(m)}{dt}\n\\] \\[\n\\boxed{C_m \\frac{dV(m)}{dt} = I(t) - \\frac{V_m(t)}{R_m}}\n\\]"
+  },
+  {
+    "objectID": "posts/introduction-spiking-nn/index.html#resolution-of-the-differential-equation",
+    "href": "posts/introduction-spiking-nn/index.html#resolution-of-the-differential-equation",
+    "title": "Introduction to Spiking Neural Networks",
+    "section": "Resolution of the differential equation",
+    "text": "Resolution of the differential equation\n\nHomogeneous solution\n\\[\n\\frac{dV(m)}{dt} + \\frac{V_m(t)}{R_m C_m} = 0\n\\]\nWe set \\(\\tau = R_m C_m\\). Then we get: \\[\nV_m(t) = A e^{\\frac{-t}{\\tau}}\n\\] where \\(A\\) is the integration constant of the problem.\n\nParticular solution\nWe assume that \\(I(t)\\) is constant. The particular solution has the same form of the second member of the equation. In other words, \\(\\frac{dV(m)}{dt} = 0\\).\n\\[\n\\implies V_m(t) = R_m I(t)\n\\]\n\n\nGeneral solution\n\\[\nV_m(t) = A e^{\\frac{-t}{\\tau}} + R_m I(t)\n\\]\nWe assume that \\(V_m(0^+) = V_m(0^-) = 0\\). Thus, we get: \\[\nA + R_m I = 0 \\iff A = - R_m I\n\\]\nSo:\n\\[\n\\boxed{V_m(t) = R_m I(1 - e^{\\frac{-t}{\\tau}})}\n\\]"
+  },
+  {
+    "objectID": "posts/introduction-spiking-nn/index.html#calculation-of-the-fire-frequency",
+    "href": "posts/introduction-spiking-nn/index.html#calculation-of-the-fire-frequency",
+    "title": "Introduction to Spiking Neural Networks",
+    "section": "Calculation of the fire frequency",
+    "text": "Calculation of the fire frequency\nThe model can become more precise by introducing a refractory time in which the neuron can not be discharged. We are interesting to evaluate the frequency when \\(I > I_{th}\\) (when \\(V_m(t)\\) is constant, \\(I_{th} = \\frac{V_{th}}{R_m}\\)): \\[\n\\begin{align}\n         & V_{th} = R_m I(1 - e^{\\frac{-(t - t_{ref})}{\\tau}}) \\\\\n    \\iff & e^{\\frac{-(t - t_{ref})}{\\tau}} = 1 - \\frac{V_{th}}{I R_m} \\\\\n    \\iff & \\frac{-(t - t_{ref})}{\\tau} = \\log{(1 - \\frac{V_{th}}{I R_m})} \\\\\n    \\iff & t = t_{ref} - \\tau \\log{(1 - \\frac{V_{th}}{I R_m})}\n\\end{align}\n\\]\nThen, we can define the fire frequency with the inverse of the total gap between the impulses (including the down-time). The fire frequency is then :\n\\[\n\\boxed{\n    f(I) = \\left\\{\\begin{array}{ll}\n    0, & I \\le I_{th} \\\\\n    \\left[t_{ref} - \\tau \\log{\\left(1 - \\frac{V_{th}}{I R_m}\\right)}\\right]^{-1}, & I > I_{th}\n    \\end{array}\\right.\n}\n\\]\n\nCase where \\(I = 0\\)\n\n\n\nFigure : RC Circuit\n\n\nWe apply the Kirchhoff’s current law on the green point : \\[\nI_{s_1} + I_{s_2} = 0\n\\]\nWe get the following relation : \\[\n\\frac{V_m(t)}{R_m} + C_m \\frac{dV(m)}{dt} = 0\n\\] \\[\n\\boxed{\\frac{dV(m)}{dt} + \\frac{V_m(t)}{\\tau} = 0}\n\\]\nwith \\(\\tau = R_m C_m\\)\n\n\nSolution of the differential equation\n\\[\nV_m(t) = A e^{\\frac{-t}{\\tau}}\n\\]\nwhere \\(A\\) is the integration constant of the problem.\nWe assume \\(V_m(0) = I R_m\\). Thus : \\[\nA = I R_m\n\\]\nWe get then :\n\\[\n\\boxed{V_m(t) = I R_m e^{\\frac{-t}{\\tau}}}\n\\]"
+  },
+  {
+    "objectID": "posts/introduction-spiking-nn/index.html#conclusion",
+    "href": "posts/introduction-spiking-nn/index.html#conclusion",
+    "title": "Introduction to Spiking Neural Networks",
+    "section": "Conclusion",
+    "text": "Conclusion\nWe recall that \\(\\tau\\) is characterized of the duration which makes the start-up level to disappear to be replaced by the permanent permanent. The permanent level is reached after several \\(\\tau\\) (\\(\\approx 5 \\tau\\)). We can do the analogy \\(V_m\\), the tension of bounds of the cellular membrane and \\(R_m\\) the membrane resistance.\n\n\n\nImpulse\n\n\nBenefits - the model will not keep an increase of the tension for ever contrary to other models without leak where it is kept until the appearance of a new impulse.\nDrawbacks - the model does not take into account the neuronal adaptation, so that it can not describe spike series."
+  },
+  {
+    "objectID": "posts/introduction-spiking-nn/index.html#architecture-of-a-snn",
+    "href": "posts/introduction-spiking-nn/index.html#architecture-of-a-snn",
+    "title": "Introduction to Spiking Neural Networks",
+    "section": "Architecture of a SNN",
+    "text": "Architecture of a SNN\nEven if SNN have an unique concept, they stay a neural network. We can find :\n\nFeedforward Neural Network\nRecurrent Neural Network\nSynfire chain\nReservoir computing"
+  },
+  {
+    "objectID": "posts/introduction-spiking-nn/index.html#spike-timing-dependent-plasticity-stdp",
+    "href": "posts/introduction-spiking-nn/index.html#spike-timing-dependent-plasticity-stdp",
+    "title": "Introduction to Spiking Neural Networks",
+    "section": "Spike-Timing-Dependent Plasticity (STDP)",
+    "text": "Spike-Timing-Dependent Plasticity (STDP)\nIt is a unsupervised learning mechanism. The training is realized layer by layer, in other words, the training of the current layer is made when the training of the previous layer is finished. Neurons of the layer compete with each other and those which fire quickly, trigger a STDP and learn from inputs:\n\\[\n\\Delta \\omega_{ij} =\n\\left\\{\n\\begin{array}{c}\na^+ \\omega_{ij}(1 - \\omega_{ij}), & si & t_j - t_i \\le 0 \\\\\na^- \\omega_{ij}(1 - \\omega_{ij}), & si & t_j - t_i > 0\n\\end{array}\n\\right.\n\\] where \\(i\\) and \\(j\\) respectively refer at the index of postsynaptic neurons and presynaptic neurons, \\(t_i\\) and t_j$ are the time related of spikes, \\(\\Delta \\omega_{ij}\\) is the modification of synaptic weights and \\(a^+\\) and \\(a^-\\) are two specific learning rates.\nWe measure the learning convergence of the \\(l\\)-nth layer under the shape :\n\\[\nC_l = \\sum_f \\sum_i \\frac{\\omega_{f,i}(1 - \\omega_{f,i})}{n_\\omega}\n\\]\nwhere \\(C_l\\) tends to \\(0\\) if each of synaptic weights converge to \\(0\\) or \\(1\\). Therefore, we stop the \\(l\\)-nth layer learning when \\(C_l\\) is enough close to \\(0\\) (i.e. \\(C_l < 0.01\\))."
+  },
+  {
+    "objectID": "posts/introduction-spiking-nn/index.html#calculation-of-the-firing-frequency",
+    "href": "posts/introduction-spiking-nn/index.html#calculation-of-the-firing-frequency",
+    "title": "Introduction to Spiking Neural Networks",
+    "section": "Calculation of the firing frequency",
+    "text": "Calculation of the firing frequency\nThe model can become more precise by introducing a refractory time in which the neuron can not be discharged. We are interesting to evaluate the frequency when \\(I > I_{th}\\) (when \\(V_m(t)\\) is constant, \\(I_{th} = \\frac{V_{th}}{R_m}\\)): \\[\n\\begin{align}\n         & V_{th} = R_m I(1 - e^{\\frac{-(t - t_{ref})}{\\tau}}) \\\\\n    \\iff & e^{\\frac{-(t - t_{ref})}{\\tau}} = 1 - \\frac{V_{th}}{I R_m} \\\\\n    \\iff & \\frac{-(t - t_{ref})}{\\tau} = \\log{(1 - \\frac{V_{th}}{I R_m})} \\\\\n    \\iff & t = t_{ref} - \\tau \\log{(1 - \\frac{V_{th}}{I R_m})}\n\\end{align}\n\\]\nThen, we can define the firing frequency with the inverse of the total gap between the impulses (including the down-time). The firing frequency is then :\n\\[\n\\boxed{\n    f(I) = \\left\\{\\begin{array}{ll}\n    0, & I \\le I_{th} \\\\\n    \\left[t_{ref} - \\tau \\log{\\left(1 - \\frac{V_{th}}{I R_m}\\right)}\\right]^{-1}, & I > I_{th}\n    \\end{array}\\right.\n}\n\\]\n\nCase where \\(I = 0\\)\n\n\n\nFigure : RC Circuit\n\n\nWe apply the Kirchhoff’s current law on the green point : \\[\nI_{s_1} + I_{s_2} = 0\n\\]\nWe get the following relation : \\[\n\\frac{V_m(t)}{R_m} + C_m \\frac{dV(m)}{dt} = 0\n\\] \\[\n\\boxed{\\frac{dV(m)}{dt} + \\frac{V_m(t)}{\\tau} = 0}\n\\]\nwith \\(\\tau = R_m C_m\\)\n\n\nSolution of the differential equation\n\\[\nV_m(t) = A e^{\\frac{-t}{\\tau}}\n\\]\nwhere \\(A\\) is the integration constant of the problem.\nWe assume \\(V_m(0) = I R_m\\). Thus : \\[\nA = I R_m\n\\]\nWe get then :\n\\[\n\\boxed{V_m(t) = I R_m e^{\\frac{-t}{\\tau}}}\n\\]"
   }
 ]
