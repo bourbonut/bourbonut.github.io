@@ -1,6 +1,12 @@
 from manim import *
 from glm import *
 from math import exp
+from random import random
+from functools import reduce
+
+frame_width = config["frame_width"]
+frame_height = config["frame_height"]
+MYYELLOW = "#ffd36a"
 
 T_START = 2
 T_END = 2.1
@@ -9,6 +15,21 @@ O = vec3(0)
 X = vec3(1, 0, 0)
 Y = vec3(0, 1, 0)
 Z = vec3(0, 0, 1)
+
+def neural_network(radius=0.1, color=WHITE, connection_color=WHITE):
+    r = radius
+    circle_ref = lambda: Circle(r, color=color, fill_opacity=0.5)
+    dy = frame_height * r * 0.5
+    dx = dy * 1.5
+    dirs = [O, dy * Y, -dy * Y, dx * X + 0.5 * dy * Y, dx * X - 0.5 * dy * Y]
+    circles = [circle_ref().shift(d) for d in dirs]
+    connections = [(0, 3), (0, 4), (1, 3), (1, 4), (2, 3), (2, 4)]
+    lines = [
+        Line(dirs[a] + r * X, dirs[b] - r * X, color=connection_color) for a, b in connections
+    ]
+    barycenter = reduce(add, dirs) / len(dirs)
+    return VGroup(*circles, *lines).shift(-barycenter)
+
 
 class Impulse(Scene):
     def construct(self):
@@ -39,3 +60,15 @@ class Impulse(Scene):
         impulse = VGroup(impulse_graph1, impulse_graph2, impulse_graph3).shift(-5.7 * X - 0.5 * Y)
         self.add(axes, mt1, mt2, mt3, threshold, resting_potential, t1, t2, t3)
         self.play(Create(impulse), run_time=3)
+
+
+class RandomSignal(Scene):
+    def construct(self):
+        nn = neural_network(0.5, MYYELLOW, MYYELLOW)
+        ax = Axes()
+        signal = ax.plot(lambda _: 2 * random() if random() > 0.5 else 0, x_range=[0, 6], color=MYYELLOW)
+        area = ax.get_area(signal, [0, 6], color=MYYELLOW, opacity=1)
+        sym = lambda obj: obj.copy().apply_matrix(mat3(X, -Y, Z))
+        full_signal = VGroup(signal, area, sym(signal), sym(area))
+        objs = VGroup(full_signal.shift(-6 * X), nn.shift(2 * X))
+        self.add(objs.shift(-objs.get_center()))
