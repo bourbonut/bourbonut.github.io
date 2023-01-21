@@ -29,7 +29,7 @@ This value in the neuron can change based on the mathematical model of the neuro
 If the value is higher than a threshold, the neuron sends only one impulse for each neuron downstream of it.
 Finally, the value of the neuron is set under his mean value. After some time, the value of the neuron is back to the mean value.
 
-![Animation : Impulse of SNN](https://cnvrg.io/wp-content/uploads/2021/05/snn.gif)
+![Animation : Impulse of SNN](Impulse.mp4)
 
 ## Several models
 
