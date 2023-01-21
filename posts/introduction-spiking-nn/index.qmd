@@ -34,34 +34,44 @@ Finally, the value of the neuron is set under his mean value. After some time, t
 ## Several models
 
 SNN are built on the mathematical descriptions of biological neurons. There are two groups of methods which are used to model SNN :
+
 - models based on conductance which describe how actions in neurons are initiated and spread
+
   1. [Hodgkin-Huxley model](https://en.wikipedia.org/wiki/Hodgkin%E2%80%93Huxley_model)
   2. [FitzHugh–Nagumo model](https://en.wikipedia.org/wiki/FitzHugh%E2%80%93Nagumo_model)
   3. [Morris–Lecar model](https://en.wikipedia.org/wiki/Morris%E2%80%93Lecar_model)
   4. [Hindmarsh–Rose model](https://en.wikipedia.org/wiki/Hindmarsh%E2%80%93Rose_model)
   5. [Izhikevich model](https://www.izhikevich.org/publications/spikes.htm)
   6. [Cable theory](https://en.wikipedia.org/wiki/Cable_theory)
-- models with a threshold which generate a impulse for a given threshold
+
+- models with a threshold which generate a spike for a given threshold
+
   1. [Perfect Integrate-and-fire](https://en.wikipedia.org/wiki/Biological_neuron_model#Perfect_Integrate-and-fire)
   2. [Leaky Integrate-and-fire](https://en.wikipedia.org/wiki/Biological_neuron_model#Perfect_Integrate-and-fire)
   3. [Adaptive Integrate-and-fire](https://en.wikipedia.org/wiki/Biological_neuron_model#Adaptive_integrate-and-fire)
 
 
 # Leaky Integrate-and-fire
+
+We are going to understand how the model _Leaky Integrate-and-fire_ works. We start with its theoretical circuit. There are two cases to study and we need to find their equation and solution:
+1. $I \ne 0$
+2. $I = 0$
+where $I$ denotes the intensity of the current.
+
 ## Case where $I \ne 0$
 
-![Figure : RC circuit](circuit-rc.png)
+![Figure : RC circuit](rc-circuit.png)
 
-Application of the Kirchhoff's current law on the green point :
+We apply the Kirchhoff's current law on the green point :
 $$
 I_e = I_{s_1} + I_{s_2}
 $$
-Characteristic relation of a resistor (Ohm's law):
+We use the characteristic relation of a resistor (Ohm's law):
 $$
 U = RI
 $$
 
-Characteristic relation of a condensator :
+And the characteristic relation of a capacitor :
 $$
 I = C \times \frac {dU}{dt}
 $$
@@ -112,37 +122,35 @@ $$
 \boxed{V_m(t) = R_m I(1 - e^{\frac{-t}{\tau}})}
 $$
 
-## Calculation of the fire frequency
+## Calculation of the firing frequency
 
 The model can become more precise by introducing a *refractory* time in which the neuron can not be discharged.
 We are interesting to evaluate the frequency when $I > I_{th}$ (when $V_m(t)$ is constant, $I_{th} = \frac{V_{th}}{R_m}$):
 $$
-V_{th} = R_m I(1 - e^{\frac{-(t - t_{ref})}{\tau}})
-$$
-$$
-\iff e^{\frac{-(t - t_{ref})}{\tau}} = 1 - \frac{V_{th}}{I R_m}
-$$
-$$
-\iff \frac{-(t - t_{ref})}{\tau} = \log{(1 - \frac{V_{th}}{I R_m})}
-$$
-$$
-t = t_{ref} - \tau \log{(1 - \frac{V_{th}}{I R_m})}
+\begin{align}
+         & V_{th} = R_m I(1 - e^{\frac{-(t - t_{ref})}{\tau}}) \\
+    \iff & e^{\frac{-(t - t_{ref})}{\tau}} = 1 - \frac{V_{th}}{I R_m} \\
+    \iff & \frac{-(t - t_{ref})}{\tau} = \log{(1 - \frac{V_{th}}{I R_m})} \\
+    \iff & t = t_{ref} - \tau \log{(1 - \frac{V_{th}}{I R_m})}
+\end{align}
 $$
 
-Then, we can define the fire frequency with the inverse of the total gap between the impulses (including the down-time). The fire frequency is then :
+Then, we can define the firing frequency with the inverse of the total gap between the impulses (including the down-time). The firing frequency is then :
 
 $$
-\boxed{f(I) = \left\{\begin{array}{ll}
-0, & I \le I_{th} \\
-(t_{ref} - \tau \log{(1 - \frac{V_{th}}{I R_m})})^{-1}, & I > I_{th}
-\end{array}\right.}
+\boxed{
+    f(I) = \left\{\begin{array}{ll}
+    0, & I \le I_{th} \\
+    \left[t_{ref} - \tau \log{\left(1 - \frac{V_{th}}{I R_m}\right)}\right]^{-1}, & I > I_{th}
+    \end{array}\right.
+}
 $$
 
-### Cas où $I = 0$
+### Case where $I = 0$
 
-![Figure : RC Circuit](circuit-rc.png)
+![Figure : RC Circuit](rc-circuit.png)
 
-Application of the Kirchhoff's current law on the green point :
+We apply the Kirchhoff's current law on the green point :
 $$
 I_{s_1} + I_{s_2} = 0
 $$
@@ -163,7 +171,7 @@ $$
 V_m(t) = A e^{\frac{-t}{\tau}}
 $$
 
-where $A$ is the integration constant of the problem. 
+where $A$ is the integration constant of the problem.
 
 We assume $V_m(0) = I R_m$. Thus :
 $$
@@ -180,20 +188,18 @@ $$
 
 We recall that $\tau$ is characterized of the duration which makes the start-up level to disappear to be replaced by the permanent permanent. 
 The permanent level is reached after several $\tau$ ($\approx 5 \tau$).
-We can do the analagy $V_m$, the tension of bounds of the cellular membrane and $R_m$ the membrane resistance.
+We can do the analogy $V_m$, the tension of bounds of the cellular membrane and $R_m$ the membrane resistance.
 
-![Impulse](impulsion.png)
+![Impulse](impulse.png)
 
 Benefits
-- the model will not keep an increase of the tension for ever contrary to other models without leak where it is kept until the appearance of a new impulse
+- the model will not keep an increase of the tension for ever contrary to other models without leak where it is kept until the appearance of a new impulse.
 
 Drawbacks
-the model does not take into account the neuronal adaptation, so that it can not describe an impulse serie.
+- the model does not take into account the neuronal adaptation, so that it can not describe spike series.
 
 
 ## Architecture of a SNN
-
-[](https://cnvrg.io/wp-content/uploads/2021/05/SNN-architectures.jpg)
 
 Even if SNN have an unique concept, they stay a neural network. We can find :
 
@@ -211,7 +217,7 @@ The learning method for SNN can be a tough task.
 
 ## Spike-Timing-Dependent Plasticity (STDP)
 
-It is a unsupervised learning mecanism. The training is realized layer by layer, in other words, the training of the current layer is made when the training of the previous layer is finished. Neurons of the layer compete with each other and those which fire quickly, trigger a STDP and learn from inputs:
+It is a unsupervised learning mechanism. The training is realized layer by layer, in other words, the training of the current layer is made when the training of the previous layer is finished. Neurons of the layer compete with each other and those which fire quickly, trigger a STDP and learn from inputs:
 
 $$
 \Delta \omega_{ij} =
@@ -222,7 +228,7 @@ a^- \omega_{ij}(1 - \omega_{ij}), & si & t_j - t_i > 0
 \end{array}
 \right.
 $$
-where $i$ and $j$ respectively refer at the index of postsynaptic neurons and presynaptic neurons, $t_i$ and t_j$ are the time related of impulses, $\Delta \omega_{ij}$ is the modification of synaptic weights and $a^+$ and $a^-$ are two specific learning rates.
+where $i$ and $j$ respectively refer at the index of postsynaptic neurons and presynaptic neurons, $t_i$ and t_j$ are the time related of spikes, $\Delta \omega_{ij}$ is the modification of synaptic weights and $a^+$ and $a^-$ are two specific learning rates.
 
 We measure the learning convergence of the $l$-nth layer under the shape :
 
@@ -235,7 +241,6 @@ where $C_l$ tends to $0$ if each of synaptic weights converge to $0$ or $1$. The
 # Scope for SNN
 
 - Prosthetist : vision and auditive neuroprosthesis
-<!-- qui utilisent des ensembles de pics comme signal envoyer au cortex visuel et permet au patient de retrouver l'abilité de s'orienter dans l'espace. Les scientifiques travaillent sur des prothéses méchaniques motorisées sur la même appproche -->
 - Robotics : [Brain Corporation](https://www.braincorp.com/) develop robots using SNN et [SyNAPSE](https://en.wikipedia.org/wiki/SyNAPSE) develop processors and neuromorphic systems.
 - Computing Vision : digital neuroprocesseur [IBM TrueNorth](https://en.wikipedia.org/wiki/Cognitive_computer#IBM_TrueNorth_chip) includes millions of programmable neurons and 256 millions of programmable synapses to simulate the operation of neurons of vision cortex.
 - Telecommunication : Qualcomm is actively on the possibility to integrate SNN in telecommunication devices.
