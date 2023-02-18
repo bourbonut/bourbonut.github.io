@@ -9,6 +9,7 @@ PRJROOT=".."
 MEDIA=$PRJROOT/manim/media
 SPUR=$PRJROOT/posts/involute-spur-gear
 SNN=$PRJROOT/posts/introduction-spiking-nn
+FL=$PRJROOT/posts/introduction-federated-learning
 
 # force
 force=$MEDIA/images/force/Gear2Gear$PNG
@@ -43,3 +44,23 @@ impulse=$MEDIA/videos/signal/720p30/Impulse.mp4
 randomsignal=$MEDIA/images/signal/RandomSignal$PNG
 cp $impulse $SNN
 cp $randomsignal $SNN/random_signal.png
+
+# federated_learning
+aggregation=$MEDIA/videos/federated_learning/720p30/Aggregation.mp4
+completetraining=$MEDIA/videos/federated_learning/720p30/CompleteTraining.mp4
+downloadtoserver=$MEDIA/videos/federated_learning/720p30/DownloadToServer.mp4
+restart=$MEDIA/videos/federated_learning/720p30/Restart.mp4
+training=$MEDIA/videos/federated_learning/720p30/Training.mp4
+uploadtocellphones=$MEDIA/videos/federated_learning/720p30/UploadToCellphones.mp4
+selection=$MEDIA/images/federated_learning/Selection$PNG
+serverandcellphones=$MEDIA/images/federated_learning/ServerAndCellphones$PNG
+serverasnn=$MEDIA/images/federated_learning/ServerAsNN$PNG
+cp $aggregation $FL
+cp $completetraining $FL
+cp $downloadtoserver $FL
+cp $restart $FL
+cp $training $FL
+cp $uploadtocellphones $FL
+cp $selection $FL/selection.png
+cp $serverandcellphones $FL/server_and_cellphones.png
+cp $serverasnn $FL/server_as_nn.png
