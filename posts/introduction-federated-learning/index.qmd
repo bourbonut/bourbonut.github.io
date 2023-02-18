@@ -1,0 +1,62 @@
+---
+title: "Introduction to Federated Learning"
+author: "Benjamin Bourbon"
+date: "2023-01-18"
+categories: [artificial intelligence]
+image: "server_and_cellphones.png"
+---
+
+# Federated Learning
+
+## Introduction
+Federated Learning (FL) was introduced by McMahan et al. (2017) which has attracted increasing interest of ML researchers.
+They proposed a decentralized collaborative approach that uses multiple devices to train a global model without sharing their local data.
+In most cases, devices are limited in resources such as computation and communication and restricted by the usage of the user.
+Federated Learning can meet expectations of specific fields such as natural language processing, computer vision, health care, transportation, finance, smart city, robotics, networking, blockchain and others.
+In other words, the fact of training a model without exchanging local data gives an overview of new possibilities for taking advantage of each other while keeping privacy.
+
+## Overview
+
+Federated Learning (FL) is a method where multiple devices (called *clients*) are led to collaborate together with communications to a *central server* in order to train a global model while protecting privacy.
+In other words, instead of sharing the local data of users, only updates of local models on clients' devices are communicated to the server.
+
+FL can be applied in various situations.
+For instance, in mobile phones there is a large amount of data, which is private by nature.
+The data could be acquired through GPS locations, microphones or cameras for example.
+If we want to build a global model such as takes account all contributions of all mobile phones, there are risks and responsibilities to deal with private data.
+FL aims to build a joint Machine Learning model (ML) without sharing local data.
+This technique could help diverse fields to collaborate together in order to train a global model that would be used by all participants.
+For instance, in hospitals, where privacy about health data, is the most important criterion, they could build an organization to perform a ML model in collaboration and every of them would take advantage of each others while keeping privacy.
+Another way to see FL application is when the implementation of the algorithm is fully decentralized.
+In other words, when FL architecture is based on **peer-to-peer**, communications between the server and devices are not required.
+For example, this approach offers new types of applications such as attack detection model that could be develop jointly by multiple banks.
+
+## Federated Learning step by step
+
+### Context
+
+![Figure : Server and Cellphones](server_and_cellphones.png)
+
+### Initialization
+
+![Figure : Server initializes a global neural network](server_as_nn.png)
+
+### Uploading the global neural network
+
+![Animation : The server uploads the global neural network to cellphones](UploadToCellphones.mp4)
+
+### Training
+
+![Animation : The cellphones train their neural network on local data](Training.mp4)
+
+### Downloading the local trained neural networks
+
+![Animation : The server downloads the local trained neural networks from cellphones](DownloadToServer.mp4)
+
+### Aggregation
+
+![Animation : The server aggregates the local trained neural networks to compute the next global neural network](Aggregation.mp4)
+
+### Restart
+
+![Animation : The process restarts with a new global neural network](Restart.mp4)
