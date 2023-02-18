@@ -16,17 +16,18 @@ X = vec3(1, 0, 0)
 Y = vec3(0, 1, 0)
 Z = vec3(0, 0, 1)
 
-def neural_network(radius=0.1, color=WHITE, connection_color=WHITE):
+
+def neural_network(radius=0.1):
     r = radius
-    circle_ref = lambda: Circle(r, color=color, fill_opacity=0.5)
+    circle_ref = lambda color: Circle(r, color=color, fill_opacity=0.5)
     dy = frame_height * r * 0.5
     dx = dy * 1.5
     dirs = [O, dy * Y, -dy * Y, dx * X + 0.5 * dy * Y, dx * X - 0.5 * dy * Y]
-    circles = [circle_ref().shift(d) for d in dirs]
-    connections = [(0, 3), (0, 4), (1, 3), (1, 4), (2, 3), (2, 4)]
-    lines = [
-        Line(dirs[a] + r * X, dirs[b] - r * X, color=connection_color) for a, b in connections
+    circles = [
+        circle_ref(color=(BLUE if i < 3 else RED)).shift(d) for i, d in enumerate(dirs)
     ]
+    connections = [(0, 3), (0, 4), (1, 3), (1, 4), (2, 3), (2, 4)]
+    lines = [Line(dirs[a] + r * X, dirs[b] - r * X) for a, b in connections]
     barycenter = reduce(add, dirs) / len(dirs)
     return VGroup(*circles, *lines).shift(-barycenter)
 
@@ -43,7 +44,9 @@ class Impulse(Scene):
         m = (f2(T_END) - f1(T_START)) / (T_END - T_START)
         p = f1(T_START) - m * T_START
         impulse_graph1 = FunctionGraph(f1, x_range=[0, T_START], color=RED)
-        impulse_graph2 = FunctionGraph(lambda t: m * t + p, x_range=[T_START, T_END], color=RED)
+        impulse_graph2 = FunctionGraph(
+            lambda t: m * t + p, x_range=[T_START, T_END], color=RED
+        )
         impulse_graph3 = FunctionGraph(f2, x_range=[T_END, 10], color=RED)
 
         threshold = DashedLine(-Y, 6 * X - Y, dash_length=0.5)
@@ -57,18 +60,25 @@ class Impulse(Scene):
         t2 = Text("Resting potential", font_size=28).next_to(resting_potential, DOWN)
         t3 = Text("Time (ms)", font_size=28).next_to(axes, DOWN)
 
-        impulse = VGroup(impulse_graph1, impulse_graph2, impulse_graph3).shift(-5.7 * X - 0.5 * Y)
+        impulse = VGroup(impulse_graph1, impulse_graph2, impulse_graph3).shift(
+            -5.7 * X - 0.5 * Y
+        )
         self.add(axes, mt1, mt2, mt3, threshold, resting_potential, t1, t2, t3)
         self.play(Create(impulse), run_time=3)
 
 
 class RandomSignal(Scene):
     def construct(self):
-        nn = neural_network(0.5, MYYELLOW, MYYELLOW)
-        ax = Axes()
-        signal = ax.plot(lambda _: 2 * random() if random() > 0.5 else 0, x_range=[0, 6], color=MYYELLOW)
-        area = ax.get_area(signal, [0, 6], color=MYYELLOW, opacity=1)
-        sym = lambda obj: obj.copy().apply_matrix(mat3(X, -Y, Z))
-        full_signal = VGroup(signal, area, sym(signal), sym(area))
-        objs = VGroup(full_signal.shift(-6 * X), nn.shift(2 * X))
+        nn = neural_network(0.5)
+        dy = frame_height * 0.6 * 0.5
+        signal = VGroup(
+            *[
+                SVGMobject(f"figures/signal{i + 1}.svg").shift((1 - i) * dy * Y)
+                for i in range(3)
+            ]
+        )
+        dy_nn = frame_height * 0.5 * 0.5
+        arrows = VGroup(*[Arrow(start= -2 * X + (1 - i) * dy * Y, end=0.35 * X + (1 - i) * dy_nn * Y) for i in range(3)])
+        objs = VGroup(signal.shift(-4 * X), nn.shift(2 * X), arrows)
         self.add(objs.shift(-objs.get_center()))
+        self.add(signal)
