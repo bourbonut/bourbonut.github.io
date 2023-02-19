@@ -26,37 +26,84 @@ The data could be acquired through GPS locations, microphones or cameras for exa
 If we want to build a global model such as takes account all contributions of all mobile phones, there are risks and responsibilities to deal with private data.
 FL aims to build a joint Machine Learning model (ML) without sharing local data.
 This technique could help diverse fields to collaborate together in order to train a global model that would be used by all participants.
-For instance, in hospitals, where privacy about health data, is the most important criterion, they could build an organization to perform a ML model in collaboration and every of them would take advantage of each others while keeping privacy.
+For instance, in hospitals, where privacy about health data, is the most important criterion, they could build an organization to perform an ML model in collaboration and every of them would take advantage of each other while keeping privacy.
 Another way to see FL application is when the implementation of the algorithm is fully decentralized.
 In other words, when FL architecture is based on **peer-to-peer**, communications between the server and devices are not required.
-For example, this approach offers new types of applications such as attack detection model that could be develop jointly by multiple banks.
+For example, this approach offers new types of applications such as attack detection model that could be developed jointly by multiple banks.
 
 ## Federated Learning step by step
 
 ### Context
 
-![Figure : Server and Cellphones](server_and_cellphones.png)
+For this example, we introduce a server and cellphones as the starting point. 
+The server leads communications with cellphones.
+Cellphones are the requested devices for this example.
+The goal is to exploit the private data of cellphones without sharing them to the server.
+
+![Figure : A server and several devices](server_and_cellphones.png)
+
+Note on the figure, only five devices are represented, but in a real world application, millions of devices could interact with a server (or an infrastructure) in order to apply the Federated Learning.
 
 ### Initialization
 
-![Figure : Server initializes a global neural network](server_as_nn.png)
+At the beginning of the FL process, a global model is initialized by the server.
+It can be a neural network or any kind of models (e.g. a decision tree).
+
+![Figure : The server initializes a global neural network](server_as_nn.png)
+
+### Selection
+
+The FL works with *rounds* where some devices are selected to train the global model on their local data.
+Every round, devices are selected randomly or arbitrary based on known information about them.
+The selection part is a crucial part because some devices could be unavailable for a moment or may have different performances of computation and communication (straggler problem).
+As well, because the private data is not communicated, the distribution of data is managed with difficulty.
+Also, it might be impraticable if all devices are selected every round.
+
+![Figure : The server selects a sample of devices](selection.png)
 
 ### Uploading the global neural network
+
+Once devices are selected, the server upload the parameters of the global model for all devices.
 
 ![Animation : The server uploads the global neural network to cellphones](UploadToCellphones.mp4)
 
 ### Training
 
+Each device trains their local model on their private data.
+
 ![Animation : The cellphones train their neural network on local data](Training.mp4)
 
 ### Downloading the local trained neural networks
+
+The server collects parameters of all local models.
 
 ![Animation : The server downloads the local trained neural networks from cellphones](DownloadToServer.mp4)
 
 ### Aggregation
 
+The local models are aggregated into a new global model.
+For instance, it can be done by computing the weighted average of the global loss function :
+
+$$
+F_g(w) = \sum_{i = 1}^N \eta_i F_i(w)
+$$
+
+where $\eta_i$ indicates the relative impact of each part of the global model and $F_i(w)$ is the loss function of each dataset $D_i$.
+For more information, check McMahan et al. (2017).
+
 ![Animation : The server aggregates the local trained neural networks to compute the next global neural network](Aggregation.mp4)
 
 ### Restart
 
+Once the new global model is computed, the process is restarted until the objective is reached (for instance by maximizing the accuracy).
+
 ![Animation : The process restarts with a new global neural network](Restart.mp4)
+
+### Complete process
+
+![Animation : Complete process of Federated Learning](CompleteTraining.mp4)
+
+## References
+
+- H. B. McMahan, E. Moore, D. Ramage, S. Hampson, and B. A. y. Arcas, “Communication-Efficient Learning of Deep Networks from Decentralized Data,” [arXiv:1602.05629](http://arxiv.org/abs/1602.05629) [cs], Feb. 2017, arXiv: 1602.05629. [Online]. Available: [http://arxiv.org/abs/1602.05629](http://arxiv.org/abs/1602.05629) 
+- Application of Reinforcement Learning to improve the selection and the aggregation of Federated Learning ([Github](https://github.com/bourbonut/reinforcedFL))
