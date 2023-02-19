@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/introduction-federated-learning/index.html",
       "/posts/introduction-spiking-nn/index.html",
       "/posts/involute-spur-gear/index.html"
     ]
