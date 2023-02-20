@@ -1,0 +1,13 @@
+---
+title: "Different projects"
+listing:
+  contents: projects
+  sort: "date desc"
+  type: grid
+  image-height: 300 px
+  categories: true
+  sort-ui: false
+  filter-ui: false
+page-layout: full
+title-block-banner: true
+---

@@ -1,5 +1,11 @@
 [
   {
+    "listing": "/projects.html",
+    "items": [
+      "/projects/performance/index.html"
+    ]
+  },
+  {
     "listing": "/index.html",
     "items": [
       "/posts/introduction-federated-learning/index.html",

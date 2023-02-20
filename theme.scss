@@ -261,3 +261,10 @@ h1,h2,h3,h4{
 code{
     color: $color3;
 }
+
+input[type=button]{
+    color:white;
+    text-decoration:none;
+    border:none;
+    border-bottom: white 1px solid;
+}
