@@ -15,14 +15,14 @@ Here is the [source of the algorithm](https://stackoverflow.com/questions/405752
 
 <script src="https://d3js.org/d3.v4.js"></script>
 
-<input id="python-button" type="button" value="Python" onclick="select_language('python');"></input>
-<input id="rust-button" type="button" value="Rust" onclick="select_language('rust');"></input>
-<input id="cpp-button" type="button" value="C++" onclick="select_language('cpp');"></input>
-<input id="elixir-button" type="button" value="Elixir" onclick="select_language('elixir');"></input>
-<input id="java-button" type="button" value="Java" onclick="select_language('java');"></input>
-<input id="lua-button" type="button" value="Lua" onclick="select_language('lua');"></input>
-<input id="javascript-button" type="button" value="Javascript" onclick="select_language('javascript');"></input>
-<input id="scala-button" type="button" value="Scala" onclick="select_language('scala');"></input>
+<input id="python-button" type="button" value="Python" style="color:white; text-decoration:none; border:none; border-bottom: white 1px solid;" onclick="select_language('python');"></input>
+<input id="rust-button" type="button" value="Rust" style="color:white; text-decoration:none; border:none; border-bottom: white 1px solid;" onclick="select_language('rust');"></input>
+<input id="cpp-button" type="button" value="C++" style="color:white; text-decoration:none; border:none; border-bottom: white 1px solid;" onclick="select_language('cpp');"></input>
+<input id="elixir-button" type="button" value="Elixir" style="color:white; text-decoration:none; border:none; border-bottom: white 1px solid;" onclick="select_language('elixir');"></input>
+<input id="java-button" type="button" value="Java" style="color:white; text-decoration:none; border:none; border-bottom: white 1px solid;" onclick="select_language('java');"></input>
+<input id="lua-button" type="button" value="Lua" style="color:white; text-decoration:none; border:none; border-bottom: white 1px solid;" onclick="select_language('lua');"></input>
+<input id="javascript-button" type="button" value="Javascript" style="color:white; text-decoration:none; border:none; border-bottom: white 1px solid;" onclick="select_language('javascript');"></input>
+<input id="scala-button" type="button" value="Scala" style="color:white; text-decoration:none; border:none; border-bottom: white 1px solid;" onclick="select_language('scala');"></input>
 
 ```python
 import math

@@ -33,7 +33,7 @@ def grab_code(language, suffix):
 
 def button(language):
     title = language.title() if language != "cpp" else "C++"
-    return f"""<input id="{language}-button" type="button" value="{title}" onclick="select_language('{language}');"></input>"""
+    return f"""<input id="{language}-button" type="button" value="{title}" style="color:white; text-decoration:none; border:none; border-bottom: white 1px solid;" onclick="select_language('{language}');"></input>"""
 
 languages = [
     ("python", "py"),
