@@ -3,6 +3,7 @@ title: "Computation of the sum of prime numbers in different languages"
 author: "Benjamin Bourbon"
 date: "2023-01-20"
 categories: [computing]
+image: "perf.png"
 ---
 
 # Description
