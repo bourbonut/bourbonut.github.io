@@ -57,7 +57,8 @@ function draw(svg, data, data_ready, keys, yfunc){
         .attr("text-anchor", "middle")
         .attr("x", width / 2)
         .attr("y", height + 30)
-        .text("Power");
+        .text("Power")
+        .attr("fill", "white");
 
     var ymax = keys.map(key => yfunc(data[key])).flat(1).reduce((a, b) => Math.max(a, b));
     // Add Y axis
