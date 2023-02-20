@@ -1,0 +1,640 @@
+---
+title: "Computation of the sum of prime numbers in different languages"
+author: "Benjamin Bourbon"
+date: "2023-01-20"
+categories: [computing]
+---
+
+# Description
+
+The project allows to see the difference of speed of program's execution between multiple languages with one algorithm which computes the sum of prime numbers. Also, the goal is to use native libraries for each language.
+
+Here is the [source of the algorithm](https://stackoverflow.com/questions/4057527/need-help-optimizing-algorithm-sum-of-all-prime-numbers-under-two-million)
+
+# Code
+
+<script src="https://d3js.org/d3.v4.js"></script>
+
+<input id="python-button" type="button" value="Python" onclick="select_language('python');"></input>
+<input id="rust-button" type="button" value="Rust" onclick="select_language('rust');"></input>
+<input id="cpp-button" type="button" value="C++" onclick="select_language('cpp');"></input>
+<input id="elixir-button" type="button" value="Elixir" onclick="select_language('elixir');"></input>
+<input id="java-button" type="button" value="Java" onclick="select_language('java');"></input>
+<input id="lua-button" type="button" value="Lua" onclick="select_language('lua');"></input>
+<input id="javascript-button" type="button" value="Javascript" onclick="select_language('javascript');"></input>
+<input id="scala-button" type="button" value="Scala" onclick="select_language('scala');"></input>
+
+```python
+import math
+from time import perf_counter
+
+
+def chrono(function):
+    def inner(*args):
+        start = perf_counter()
+        result = function(*args)
+        duration = perf_counter() - start
+        print("%0.3f x 10e(-3) seconds" % (duration * 1_000))
+        return result
+
+    return inner
+
+
+# @chrono
+def P10(n):
+    r = int(n ** 0.5)
+    assert r * r <= n and (r + 1) ** 2 > n
+    V = [n // i for i in range(1, r + 1)]
+    V += list(range(V[-1] - 1, 0, -1))
+    S = {i: i * (i + 1) // 2 - 1 for i in V}
+    for p in range(2, r + 1):
+        if S[p] > S[p - 1]:  # p is prime
+            sp = S[p - 1]  # sum of primes smaller than p
+            p2 = p * p
+            for v in V:
+                if v < p2:
+                    break
+                S[v] -= p * (S[v // p] - sp)
+    return S[n]
+
+
+def _format(dist, value):
+    return value + " " * (dist - len(value))
+
+
+print("Power | Time (µs) | Resultat")
+print("========================================")
+for i in range(1, 9):
+    start = perf_counter()
+    result = P10(10 ** i)
+    duration = int((perf_counter() - start) * 1_000_000)
+    print(_format(5, str(i)) + " | " + _format(9, str(duration)) + " | " + str(result))
+```
+
+```rust
+use std::collections::HashMap;
+use std::time::Instant;
+
+type Dict = HashMap<u64, u128>;
+
+fn get_keys(n: u64, half_size: u64) -> Vec<u64> {
+    // Calculation of keys used in the HashMap
+    let mut v: Vec<u64> = Vec::new();
+    for i in 0..half_size + 1 {
+        v.push(n / (i + 1));
+    }
+    let v_max = v[half_size as usize];
+    for i in (1..v_max).rev() {
+        v.push(i);
+    }
+    v
+}
+
+fn get_sums(keys: &[u64]) -> Dict {
+    // Initialisation du hashmap
+    let mut hmap = HashMap::new();
+    for key in keys.iter() {
+        let big_key = *key as u128;
+        let value = (big_key * (big_key + 1)) / 2 - 1;
+        hmap.insert(*key, value);
+    }
+    hmap
+}
+
+fn calculate_sums(mut hmap: Dict, keys: &[u64], square_n: u64) -> Dict {
+    for p in 2..square_n + 1 {
+        let current_sum = hmap[&(p - 1)];
+        if hmap[&p] > current_sum {
+            let p_square = p * p;
+            for key in keys.iter() {
+                if *key < p_square {
+                    break;
+                }
+                let new_value = hmap[&key] - (p as u128) * (hmap[&(key / p)] - current_sum);
+                hmap.insert(*key, new_value);
+            }
+        }
+    }
+    hmap
+}
+
+fn primes(n: u64) -> u128 {
+    let square_n = (n as f64).sqrt() as u64;
+    assert!(square_n * square_n <= n && (square_n + 1).pow(2) > n);
+    let half_size = square_n - 1;
+    let keys = get_keys(n, half_size);
+    let p_keys = &keys;
+    let mut all_sums = get_sums(p_keys);
+    all_sums = calculate_sums(all_sums, p_keys, square_n);
+    all_sums[&n]
+}
+
+fn format(dist: usize, value: &String) -> String {
+    let mut v: String = value.to_string();
+    for _ in 1..(dist - (*value).len()) {
+        v += &" ";
+    }
+    return v;
+}
+
+fn main() {
+    println!("Power | Time (µs) | Resultat");
+    println!("========================================");
+    for i in 1..9 {
+        let now = Instant::now();
+        let n: u64 = (10_u64).pow(i);
+        let value: u128 = primes(n);
+        let new_now = Instant::now();
+        println!(
+            "{} | {} | {}",
+            format(6, &(i.to_string())),
+            format(10, &(new_now.duration_since(now).as_micros().to_string())),
+            value
+        );
+    }
+}
+```
+
+```cpp
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+#include <assert.h>
+#include <stdlib.h>
+#include <unordered_map>
+#include <chrono>
+#include <string>
+using namespace std::chrono;
+using namespace std;
+
+typedef unordered_map<long, long long> umap;
+
+void generate_key_array(long long key_array[], long long n, long half_size){
+  // generation of a key array which serves for the dictionary all_sums
+  long long value;
+
+  for(long index = 0; index <= half_size+1; index++){
+    value = (long long) n / (index + 1);
+    key_array[index] = value;
+  }
+
+  for(long index = half_size + 1; index < 2 * half_size + 1; index++){
+    value = key_array[index - 1] - 1;
+    key_array[index] = value;
+  }
+}
+
+void generate_all_sums(umap& all_sums, long long key_array[], long size){
+  // generation of dictionary all_sums
+  long long value;
+
+  for(long index = 0; index < size; index++){
+    value = key_array[index];
+    // storing sum of numbers for 1 to key
+    all_sums[value] = ((long long) (value*(value + 1))/2) - 1;
+  }
+}
+
+
+void calculate_new_sums(umap& all_sums, long long key_array[], long long square_root){
+  // core of the program for calculate the sum of prime numbers
+  long long current_sum;
+  long long p_square;
+  long index;
+  long long key;
+  long long second_key;
+
+  for(long p = 2; p <= square_root; p++){
+    current_sum = all_sums[p - 1];
+    if(all_sums[p] > current_sum){ //if p is prime
+      p_square = p * p;
+      index = 0;
+      key = key_array[index];
+
+      // while the key is lower than p * p
+      while(key >= p_square){
+        second_key = key / p;
+        // updating the sum of the key 'key'
+        all_sums[key] -= p * (all_sums[second_key] - current_sum);
+        index++;
+        key = key_array[index];
+      }
+    }
+  }
+}
+
+long long P10(long long n){
+  long long square_root = (long long) sqrt(n);
+  //check if the program will work
+  assert ((square_root*square_root <= n) && ((square_root + 1) * (square_root + 1) > n));
+
+  long long final_sum;
+  long half_size = square_root - 1;
+
+  long long* key_array = new long long [half_size * 2 + 1];
+  generate_key_array(key_array, n, half_size);
+
+  long size = 2 * half_size + 1;
+  // dictionary of sums
+  umap all_sums;
+  generate_all_sums(all_sums, key_array, size);
+  calculate_new_sums(all_sums, key_array, square_root);
+
+  final_sum = all_sums[n];
+  delete key_array;
+  all_sums.clear();
+
+  return final_sum;
+}
+
+string format(int dist, string value){
+  string hole = "";
+  for(int _=0; _<=(dist-(int)(value).size()); _++){
+    hole+=" ";
+  }
+  return value + hole;
+}
+
+
+int main(){
+  // Goal: 100 000 000 000
+  // Awaited result: 201 467 077 743 744 681 014
+  auto start = high_resolution_clock::now();
+  long long value;
+  cout << "Power | Time (µs) | Result" << endl;
+  cout << "========================================" << endl;
+  for(int i=1; i<=8; i++){
+    // cout << "Power: " << i << endl;
+    value = P10(pow(10,i));
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start);
+    // cout << value << endl;
+    // cout << "Time taken by function: " << duration.count() << " x 10e(-3) seconds" << endl;
+    cout << format(4, std::to_string(i)) << " | " << format(8, to_string(duration.count())) << " | " << value << endl;
+  }
+  return 0;
+}
+```
+
+```elixir
+defmodule Primes do
+  @spec sqrt(integer) :: integer
+  defp sqrt(n) do
+    trunc(:math.sqrt(n))
+  end
+
+  @spec head_keys(integer, integer) :: [integer]
+  defp head_keys(n, root_n) do
+    1..(root_n + 1)
+    |> Enum.map(&div(n, &1))
+  end
+
+  @spec tail_keys(integer, integer) :: [integer]
+  defp tail_keys(n, root_n) do
+    Enum.to_list(div(n, root_n)..1)
+  end
+
+  @spec generate_keys(integer, integer) :: [integer]
+  defp generate_keys(n, root_n) do
+    head_keys(n, root_n) ++ tail_keys(n, root_n)
+  end
+
+  @spec n_sums(integer) :: {integer}
+  defp n_sums(i) do
+    {i, div(i * (i + 1), 2) - 1}
+  end
+
+  @spec generate_sums([integer]) :: %{integer => integer}
+  defp generate_sums(keys) do
+    Enum.into(keys, %{}, &n_sums(&1))
+  end
+
+  @spec small(integer, %{integer => integer}, integer, integer) :: {integer}
+  defp small(v, dict, p, sp) do
+    {v, dict[v] - p * (dict[div(v, p)] - sp)}
+  end
+
+  @spec calculate(%{integer => integer}, [integer], integer, integer) :: %{integer => integer}
+  defp calculate(sums, keys, p, limit) when p < limit do
+    sum_p = sums[p - 1]
+
+    if sums[p] > sum_p do
+      Enum.take_while(keys, &(&1 >= p * p))
+      |> Enum.into(%{}, &small(&1, sums, p, sum_p))
+      |> (&Map.merge(sums, &1)).()
+      |> calculate(keys, p + 1, limit)
+    else
+      calculate(sums, keys, p + 1, limit)
+    end
+  end
+
+  @spec calculate(%{integer => integer}, [integer], integer, integer) :: %{integer => integer}
+  defp calculate(sums, _, p, limit) when p >= limit do
+    sums
+  end
+
+  @spec sum_up_to(integer) :: integer
+  def sum_up_to(n) do
+    root_n = sqrt(n)
+    keys = generate_keys(n, root_n)
+    sums = generate_sums(keys)
+    calculate(sums, keys, 2, root_n + 1)[n]
+  end
+
+  @spec measure(function) :: integer
+  def measure(function) do
+    function
+    |> :timer.tc()
+    |> elem(0)
+    # divide by 1_000 for milliseconds
+    |> Kernel./(1)
+  end
+end
+
+defmodule Formatter do
+  @spec add_space(integer, charlist) :: charlist
+  defp add_space(0, string) do
+    string
+  end
+
+  @spec add_space(integer, charlist) :: charlist
+  defp add_space(i, string) do
+    add_space(i - 1, string <> " ")
+  end
+
+  @spec format(integer, integer) :: charlist
+  defp format(dist, value) do
+    string_v = "#{value}"
+    add_space(dist - String.length(string_v), string_v)
+  end
+
+  @spec format_all(integer, integer, integer) :: nil
+  def format_all(power, time, value) do
+    IO.puts("#{format(5, power)} | #{format(9, time)} | #{value}")
+  end
+end
+
+IO.puts("Power | Time (µs) | Result")
+IO.puts("=========================================")
+
+Primes.sum_up_to(100)
+
+1..8
+|> Enum.map(fn exp ->
+  f = Primes.measure(fn -> Primes.sum_up_to(:math.pow(10, exp) |> round) end)
+  Formatter.format_all(exp, f |> round, Primes.sum_up_to(:math.pow(10, exp) |> round))
+end)
+```
+
+```java
+import java.util.HashMap;
+import java.util.Vector;
+import java.lang.Math;
+
+public class Main{
+
+    static Vector<Integer> get_keys(Integer n, Integer half_size){
+        Vector<Integer> V = new Vector<>();
+        for (Integer i = 0; i < half_size; i++){
+            V.add(n / (i + 1));
+        }
+        Integer vmax = V.get(V.size() - 1) - 1;
+        for (Integer i = vmax; i > 0; i--){
+            V.add(i);
+        }
+        return V;
+    }
+
+    static HashMap<Integer, Long> get_sums(Vector<Integer> keys){
+        HashMap<Integer, Long> hmap = new HashMap<>();
+        for (int key: keys){
+            long big_key = key;
+            long value = (big_key * (big_key + 1)) / 2 - 1;
+            hmap.put(key, value);
+        }
+        return hmap;
+    }
+
+    static HashMap<Integer, Long> calculate_sums(HashMap<Integer, Long> hmap, Vector<Integer> keys, int square_n){
+        for (Integer p = 2; p < square_n + 1; p++){
+            long current_sum = hmap.get(p - 1);
+            if (hmap.get(p) > current_sum){
+                long p_square = p * p;
+                for (int key: keys){
+                    if (key < p_square){
+                        break;
+                    }
+                    long new_value = hmap.get(key) - (long)p * (hmap.get(key / p) - current_sum);
+                    hmap.put(key, new_value);
+                }
+            }
+        }
+        return hmap;
+    }
+
+    static long primes(int n){
+        int square_n = (int) Math.sqrt(n);
+        assert square_n * square_n <= n && (square_n + 1) * (square_n + 1) > n;
+        int half_size = square_n - 1;
+        Vector<Integer> keys = Main.get_keys(n, half_size);
+        HashMap<Integer, Long> all_sums = Main.get_sums(keys);
+        all_sums = Main.calculate_sums(all_sums, keys, square_n);
+        return all_sums.get(n);
+    }
+
+    static String format(int dist, String value){
+        return value + " ".repeat(dist - value.length());
+    }
+
+    public static void main(String[] args){
+        Main App = new Main();
+        System.out.println("Power | Time (µs) | Resultat");
+        System.out.println("========================================");
+        primes(100);
+        for (int i = 1; i < 9; i++){
+            long start = System.nanoTime();
+            long result = primes((int) Math.pow(10, i));
+            long duration = (System.nanoTime() - start) / 1_000;
+            System.out.println(
+                Main.format(5, String.valueOf(i)) + " | " +
+                Main.format(9, String.valueOf(duration)) + " | " +
+                String.valueOf(result)
+            );
+        }
+    }
+}
+```
+
+```lua
+function P10(n)
+    r = math.floor(n^0.5)
+    assert(r * r <= n and (r + 1)^2 > n)
+    V = {}
+    for i = 1, r + 1, 1 do
+        table.insert(V, n // i)
+    end
+    for i = V[#V] - 1, 1, -1 do
+        table.insert(V, i)
+    end
+    S = {}
+    for _, i in ipairs(V) do
+        S[i] = i * (i + 1) // 2 - 1
+    end
+    for p = 2, r, 1 do
+        if S[p] > S[p - 1] then
+            sp = S[p - 1]
+            p2 = p * p
+            for _, v in ipairs(V) do
+                if v < p2 then
+                    break
+                end
+                S[v] = S[v] - p * (S[v // p] - sp)
+            end
+        end
+    end
+    return S[n]
+end
+
+function format(dist, value)
+    return value .. string.rep(" ", (dist - string.len(value)))
+end
+
+print("Power | Time (µs) | Resultat")
+print("========================================")
+for i = 1, 8, 1 do
+    start = os.clock()
+    result = P10(math.floor(10^i))
+    duration = math.floor((os.clock() - start) * 10^6)
+    print(format(5, tostring(i)) .. " | " .. format(9, tostring(duration)) .. " | " .. tostring(result))
+end
+```
+
+```javascript
+const {performance} = require("perf_hooks");
+
+function P10(n){
+    var r = Math.floor(n ** 0.5);
+    console.assert(r * r <= n && Math.pow(r + 1, 2) > n);
+    var V = [];
+    for (let i = 1; i < r + 1; i++){
+        V.push(Math.floor(n / i));
+    }
+    for (let i = V[V.length - 1] - 1; i > 0; i--){
+        V.push(i);
+    }
+    var S = V.reduce((S, i) => {
+        S[i] = Math.floor(i * (i + 1) / 2) - 1
+        return S;
+    }, {});
+    var length = V.length;
+    for (let p = 2; p < r + 1; p++){
+        if (S[p] > S[p - 1]) {
+            var sp = S[p - 1];
+            var p2 = p * p;
+            for (let index = 0; index < length; index++){
+                let v = V[index];
+                if (v < p2){
+                    break;
+                }
+                S[v] -= p * (S[Math.floor(v / p)] - sp);
+            }
+        }
+    }
+    return S[n];
+}
+
+function format(dist, value){
+    return value + " ".repeat(dist - value.length)
+}
+
+console.log("Power | Time (µs) | Resultat")
+console.log("========================================")
+P10(100)
+for (let i=1; i<9; i++){
+    var start = performance.now();
+    var result = P10(Math.floor(Math.pow(10, i)));
+    var duration = Math.floor((performance.now() - start) * 1_000);
+    console.log(format(5, String(i)) + " | " + format(9, String(duration)) + " | " + String(result));
+}
+```
+
+```scala
+import scala.collection.mutable.HashMap
+import scala.collection.immutable.Vector
+import scala.math.sqrt
+import scala.math.pow
+import scala.math.BigInt
+
+def get_keys(n: Long, half_size:Long): Vector[Long] =
+  var v = Vector.range(0L, half_size + 1L).map(i => n / (i + 1))
+  val vmax = v(half_size.asInstanceOf[Int])
+  v ++ Vector.range(1L, vmax).reverse
+
+def get_sums(keys: Vector[Long]) : HashMap[Long, BigInt] =
+  var hmap = HashMap.empty[Long, BigInt]
+  for key <- keys do
+    val k = BigInt(key)
+    val value = (k * (k + 1)) / 2 - 1
+    hmap.put(key, value)
+  hmap 
+
+def calculate_sums(hmap: HashMap[Long, BigInt], keys: Vector[Long], square_n: Long): HashMap[Long, BigInt] =
+  var cmap = hmap.clone()
+  for p <- (2L to square_n) do
+    val current_sum = cmap(p - 1)
+    if (cmap(p) > current_sum) {
+      val p_square = p * p
+      for key <- keys.takeWhile(p => p >= p_square) do
+        val new_value = cmap(key) - p * (cmap(key / p) - current_sum)
+        cmap.update(key, new_value)
+    }
+  cmap
+
+def primes(n: Long): BigInt =
+  val square_n = sqrt(n.asInstanceOf[Float]).asInstanceOf[Long]
+  val half_size = square_n - 1
+  val keys = get_keys(n, half_size)
+  var all_sums = get_sums(keys)
+  all_sums = calculate_sums(all_sums, keys, square_n)
+  all_sums(n)
+
+def add_space(i:Int, string:String) : String =
+  if (i == 0){
+    return string
+  } else {
+    return add_space(i - 1, string.concat(" "))
+  }
+
+def format(dist:Int, string: String): String =
+  add_space(dist - string.length(), string)
+
+@main def main() =
+  val result = primes(10)
+  println("Power | Time (µs) | Resultat")
+  println("========================================")
+  for power <- (1 to 8) do
+    val start = System.nanoTime
+    val n = pow(10.0, power.asInstanceOf[Double]).asInstanceOf[Long]
+    val result = primes(n)
+    val duration = ((System.nanoTime - start) / 1e3d).asInstanceOf[Int]
+    println(s"${format(5, s"$power")} | ${format(9, s"$duration")} | $result")
+
+```
+
+# Graph
+
+You can interact with the legend (for instance, click on `elixir`).
+
+<div id="standard"></div>
+<div id="logarithmic"></div>
+
+
+# Notes
+
+The idea comes from the challenge Euler problem n°245 where one part of the problem involves to compute the sum of prime numbers up to $10^{11}$.
+
+[GitHub Repository](https://github.com/bourbonut/prime_numbers_sum)
+
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="plot.js"></script>
+<script src="selection.js"></script>
