@@ -10,6 +10,7 @@ MEDIA=$PRJROOT/manim/media
 SPUR=$PRJROOT/posts/involute-spur-gear
 SNN=$PRJROOT/posts/introduction-spiking-nn
 FL=$PRJROOT/posts/introduction-federated-learning
+RL=$PRJROOT/posts/introduction-reinforcement-learning
 
 # force
 force=$MEDIA/images/force/Gear2Gear$PNG
@@ -64,3 +65,23 @@ cp $uploadtocellphones $FL
 cp $selection $FL/selection.png
 cp $serverandcellphones $FL/server_and_cellphones.png
 cp $serverasnn $FL/server_as_nn.png
+
+# reinforcement_learning
+context=$MEDIA/images/reinforcement_learning/Context$PNG
+dice=$MEDIA/images/reinforcement_learning/Dice$PNG
+expectedrewardinit=$MEDIA/images/reinforcement_learning/ExpectedRewardInit$PNG
+simplified=$MEDIA/images/reinforcement_learning/Simplified$PNG
+rlimage=$MEDIA/images/reinforcement_learning/Image$PNG
+eat=$MEDIA/videos/reinforcement_learning/720p30/Eat.mp4
+expectedrewardanimation=$MEDIA/videos/reinforcement_learning/720p30/ExpectedRewardAnimation.mp4
+randompath=$MEDIA/videos/reinforcement_learning/720p30/RandomPath.mp4
+rewardsdot=$MEDIA/videos/reinforcement_learning/720p30/RewardsDot.mp4
+cp $context $RL/context.png
+cp $dice $RL/dice.png
+cp $expectedrewardinit $RL/expected_reward_init.png
+cp $simplified $RL/simplified.png
+cp $rlimage $RL/image.png
+cp $eat $RL
+cp $expectedrewardanimation $RL
+cp $randompath $RL
+cp $rewardsdot $RL
