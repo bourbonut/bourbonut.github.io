@@ -20,5 +20,6 @@ website:
 
 format:
   html:
-    theme: [theme.scss]
+    theme: [cerulean, theme.scss]
+    highlight-style: syntax.theme
 
