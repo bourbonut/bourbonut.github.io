@@ -10,7 +10,7 @@ website:
       - icon: github
         href: https://github.com/bourbonut
       - icon: linkedin
-        href: https://www.linkedin.com/in/benjamin-bourbon-84a6751b8/
+        href: https://www.linkedin.com/in/benjamin-bourbon/
     left:
       - text: "Posts"
         file: index.qmd
