@@ -624,8 +624,8 @@ def format(dist:Int, string: String): String =
 
 # Graph
 
-The first graph is the execution time (in $s$) given the power of $10^x$.
-The second graph is the execution time (in $\log(s)$) after the application of the logarithm function given the power of $10^x$.
+The first graph is the execution time (in $\mu s$) given the power of $10^x$.
+The second graph is the execution time (in $\log(\mu s)$) after the application of the logarithm function given the power of $10^x$.
 You can interact with the legend (for instance, click on `elixir`).
 
 <div id="standard"></div>
