@@ -1,9 +1,9 @@
 project:
   type: website
-  output-dir: docs
 
 website:
   title: "Blog"
+  site-url: "https://bourbonut.github.io/"
   navbar:
     right:
       - about.qmd
@@ -16,7 +16,9 @@ website:
         file: index.qmd
       - text: "Projects"
         file: projects.qmd
-  page-footer: "Copyright 2023, Bourbon Benjamin"
+  page-footer: "Copyright 2023-2025, Bourbon Benjamin"
+  repo-url: https://github.com/bourbonut/bourbonut.github.io
+  repo-actions: [source, issue]
 
 format:
   html:
