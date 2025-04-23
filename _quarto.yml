@@ -21,5 +21,4 @@ website:
 format:
   html:
     theme: [cerulean, theme.scss]
-    highlight-style: syntax.theme
-
+    highlight-style: syntax.json

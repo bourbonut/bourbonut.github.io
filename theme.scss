@@ -1,31 +1,35 @@
 /*-- scss:defaults --*/
 
 // Kawagawa theme
-$background-color:          #181616;
-$lighter-background-color:  #282727;
+$background-color:          #1e222a;
+$darker-background-color:   #1b1f27;
 $text-color:                #c5c9c5;
 $function-color:            #8aa4b0;
-$identfier-color:           #e6c284;
+$identfier-color:           #ebcb8b;
 $type-color:                #8ea4a2;
 $number-color:              #a292a3;
 $statement-color:           #8892a7;
 $bracket-color:             #9f9b93;
 $string-color:              #98bb6c;
 $builin-variables:          #c4746e;
-$comment-color:             #605c58;
+$comment-color:             #42464e;
 
 $body-bg : $background-color;
 $body-color: $text-color;
 
-$navbar-bg: $lighter-background-color;
+$navbar-bg: $darker-background-color;
 
-// $code-block-bg: $lighter-background-color;
-// $code-bg: $lighter-background-color;
+// $code-block-bg: $darker-background-color;
+// $code-bg: $darker-background-color;
 
 
 /*-- scss:rules --*/
 
 h1, h2, h3, h4 {
+  color: $identfier-color;
+}
+
+.quarto-title-banner h1, .quarto-title-banner .h1, .quarto-title-banner h2, .quarto-title-banner .h2 {
   color: $identfier-color;
 }
 
@@ -35,12 +39,12 @@ code {
 
 p code:not(.sourceCode), li code:not(.sourceCode), td code:not(.sourceCode){
   background-color: $background-color;
-  border: 2px solid $lighter-background-color; 
+  border: 2px solid $comment-color; 
 }
 
 div.sourceCode{
   background-color: $background-color;
-  border: 2px solid $lighter-background-color; 
+  border: 2px solid $comment-color;
 }
 
 input[type=button] {
@@ -48,4 +52,8 @@ input[type=button] {
   text-decoration:none;
   border:none;
   border-bottom: $text-color 1px solid;
+}
+
+.img-fluid {
+  border-radius: 8px;
 }

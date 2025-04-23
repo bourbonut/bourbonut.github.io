@@ -56,19 +56,19 @@ Note: for `glm`, see [PyGLM](see https://github.com/Zuzu-Typ/PyGLM).
 
 There are several dimensions that are normalized in industry :
 
-| Variable | Description | Relation |
-| --- | --- | --- |
-| $m$  | the module | Fundamental variable |
-| $z$  | the number of teeth | Fundamental variable |
-| $\alpha$ | the pressure angle | Fundamental variable |
-| $k_a$ | the addendum coefficient usually $k_a = 1$ | Fundamental variable |
-| $k_f$ | the dedendum coefficient usually $k_f = 1.25$ | Fundamental variable |
-| $h_a$ | the addendum height | $h_a = k_a m$ |
-| $h_f$ | the dedendum height | $h_f = k_f m$ |
-| $r_p$ | the pitch radius | $r_p = \frac{mz}{2}$ |
-| $r_b$ | the base radius | $r_b = r_p \cos(\alpha)$ |
-| $r_a$ | the addendum radius | $r_a = r_p + h_a$ |
-| $r_f$ | the dedendum radius | $r_f = r_p - h_f$ |
+| Variable | Description                                   | Relation                 |
+| -------- | --------------------------------------------- | ------------------------ |
+| $m$      | the module                                    | Fundamental variable     |
+| $z$      | the number of teeth                           | Fundamental variable     |
+| $\alpha$ | the pressure angle                            | Fundamental variable     |
+| $k_a$    | the addendum coefficient usually $k_a = 1$    | Fundamental variable     |
+| $k_f$    | the dedendum coefficient usually $k_f = 1.25$ | Fundamental variable     |
+| $h_a$    | the addendum height                           | $h_a = k_a m$            |
+| $h_f$    | the dedendum height                           | $h_f = k_f m$            |
+| $r_p$    | the pitch radius                              | $r_p = \frac{mz}{2}$     |
+| $r_b$    | the base radius                               | $r_b = r_p \cos(\alpha)$ |
+| $r_a$    | the addendum radius                           | $r_a = r_p + h_a$        |
+| $r_f$    | the dedendum radius                           | $r_f = r_p - h_f$        |
 
 We can start with a simple gear profile :
 
@@ -86,7 +86,7 @@ But we also need to know when the involute function stops.
 To get this information, we must find $t$ when $\Vert \vec \theta(r_b, t, t_0) \Vert = r_a$.
 $$
 \begin{align}
-    \Vert \vec \theta(r_b, t, t_0) \Vert^2 & =  r_b^2 \left[ \cos(t - t_0) + t \sin(t - t_0)  \right]^2 + \left[ \sin(t - t_0) - t \cos(t - t_0)  \right]^2 \\
+    \Vert \vec \theta(r_b, t, t_0) \Vert^2 & = r_b^2 \left[ \cos(t - t_0) + t \sin(t - t_0)  \right]^2 + \left[ \sin(t - t_0) - t \cos(t - t_0)  \right]^2 \\
     & = r_b^2 \big(\left[ \cos(t - t_0)^2 + \sin(t - t_0)^2 \right] + t^2 \times \left[ \cos(t - t_0)^2 + \sin(t - t_0)^2 \right]  \\
     & + \left[ 2t\cos(t - t_0)\sin(t-t_0) - 2t\cos(t - t_0)\sin(t-t_0) \right]\big) \\
     & = r_b^2 (1 + t^2)
