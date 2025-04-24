@@ -1,7 +1,7 @@
 from manim import *
 from glm import *
 from utils import *
-from utils.maths import O, X, Y, rotation
+from utils.maths import O, X, Y, Z, rotation
 from math import pi, atan2, sin, cos, asin, acos, tan
 
 
@@ -208,7 +208,7 @@ class BevelGearSection(Scene):
         self.add(group)
 
 
-class SphericalRepr(Scene):
+class SphericalRepr(ThreeDScene):
 
     def construct(self):
         z_pinion = 10
@@ -229,3 +229,142 @@ class SphericalRepr(Scene):
         k = sin(gamma_p) / z
         gamma_r = gamma_p - atan2(2 * kd * k, 1)
         gamma_f = gamma_p + atan2(2 * ka * k, 1)
+
+        epsilon = pi / 3
+        phi = epsilon * sin(gamma_b)
+
+        self.set_camera_orientation(phi=75 * DEGREES, theta=-20 * DEGREES, zoom=0.7)
+
+        rho1_circle = Circle(rho1, color=WHITE)
+        # arc = Arc(rho1, -pi / 2, angle=pi).rotate(pi / 2, Y, about_point=O).rotate(-pi / 6, Z, about_point=O)
+        # self.add(arc)
+
+        rb = rho1 * sin(gamma_b)
+        base_circle = (
+            Circle(radius=rb, color=WHITE)
+            .rotate(pi / 2, Y, about_point=O)
+            .move_to(rho1 * cos(gamma_b) * X)
+            .rotate(gamma_b, Y, about_point=O)
+        )
+
+        positions = {
+            "O": rho1 * cos(gamma_b) * rotate(gamma_b, Y) * X,
+            "P": rho1 * rotate(phi, Z) * X,
+            "M": rho1 * X,
+            "Q": rho1 * rotate(-epsilon, rotate(gamma_b, Y) * X) * X,
+        }
+
+        center = VGroup(
+            Dot3D(positions["O"]),
+            MathTex("O")
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(rho1 * cos(gamma_b) * rotate(gamma_b, Y) * (X - 0.07 * Z - 0.03 * Y)),
+        )
+
+        P = VGroup(
+            Dot3D(positions["P"]),
+            MathTex("P")
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(rho1 * rotate(phi, Z) * (X + 0.05 * Z + 0.06 * Y)),
+        )
+
+        M = VGroup(
+            Dot3D(positions["M"]),
+            MathTex("M")
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(rho1 * (X - 0.05 * Z - 0.06 * Y)),
+        )
+
+        Q = VGroup(
+            Dot3D(positions["Q"]),
+            MathTex("Q")
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(rho1 * rotate(-epsilon, rotate(gamma_b, Y) * X) * (X + 0.06 * Y + 0.08 * Z)),
+        )
+
+        points = [center, P, M, Q]
+
+        cone = Cone(rb, rho1 * cos(gamma_b), -rotate(gamma_b, Y) * X, fill_color=DARK_BLUE).set_opacity(0.05)
+        sphere = Sphere(radius=rho1, u_range=(0, pi), fill_color=DARK_GRAY).rotate(-pi / 2, X, about_point=O).set_opacity(0.01)
+
+        shapes = [sphere, cone]
+
+        lines = [
+            Line3D(positions["O"], positions["Q"]),
+            Line3D(positions["O"], positions["M"]),
+            DashedLine(O, positions["O"], dash_length=0.2, color=GREEN),
+            DashedLine(O, rotate(-epsilon, positions["O"]) * rotate(pi / 2, Z) * positions["M"], dash_length=0.2, color=BLUE),
+        ]
+
+        system0 = VGroup(
+            Arrow3D(O, 1.1 * positions["P"]),
+            Arrow3D(O, 1.1 * rotate(pi / 2, Z) * positions["P"]),
+            Arrow3D(O, 0.5 * rho1 * Z),
+            MathTex("\\overrightarrow{x_0}", font_size=80)
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(1.4 * rotate(pi / 2, Z) * rho1 * rotate(phi, Z) * (X + 0.05 * Y)),
+            MathTex("\\overrightarrow{z_0}")
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(1.15 * positions["P"]),
+            MathTex("\\overrightarrow{y_0}, \\overrightarrow{y_1}")
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(0.5 * rho1 * (Z + 0.7 * X)),
+        )
+        center = system0.get_center()
+        system0 = system0.move_to(1.8 * Z + center)
+
+        system1 = VGroup(
+            Arrow3D(O, 1.1 * positions["M"]),
+            Arrow3D(O, 1.1 * rotate(pi / 2, Z) * positions["M"]),
+            MathTex("\\overrightarrow{x_1}, \\overrightarrow{x_2}", font_size=70)
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(1.35 * rotate(pi / 2, Z) * rho1 * (X + 0.04 * Y)),
+            MathTex("\\overrightarrow{z_1}")
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(1.2 * positions["M"]),
+        )
+        center = system1.get_center()
+        system1 = system1.move_to(1.8 * Z + center).set_color(RED)
+
+        system2 = VGroup(
+            Arrow3D(positions["O"], 1.1 * positions["O"]),
+            Arrow3D(O, 0.5 * rotate(-pi / 2, Y) * positions["O"]),
+            MathTex("\\overrightarrow{y_2}")
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(0.5 * rotate(-pi / 2, Y) * rho1 * cos(gamma_b) * rotate(gamma_b, Y) * (X + 0.15 * Y)),
+            MathTex("\\overrightarrow{z_2}, \\overrightarrow{z_3}")
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(1.2 * positions["O"]),
+        )
+        center = system2.get_center()
+        system2 = system2.move_to(1.8 * Z + center).set_color(GREEN)
+
+        system3 = VGroup(
+            Arrow3D(O, 0.5 * rotate(-epsilon, positions["O"]) * rotate(-pi / 2, Y) * positions["O"]),
+            Arrow3D(
+                rotate(-epsilon, positions["O"]) * rotate(pi / 2, Z) * positions["M"],
+                1.1 * rotate(-epsilon, positions["O"]) * rotate(pi / 2, Z) * positions["M"]
+            ),
+        )
+        center = system3.get_center()
+        system3 = system3.move_to(1.8 * Z + center).set_color(BLUE)
+
+        group = VGroup(
+            *shapes,
+            *points,
+            *lines,
+            rho1_circle,
+            base_circle,
+        ).move_to(0.2 * Z)
+        self.add(group, system0, system1, system2, system3)
