@@ -45,6 +45,7 @@ class BevelGearSection(Scene):
         gamma_r = gamma_p - atan2(2 * kd * k, 1)
         gamma_f = gamma_p + atan2(2 * ka * k, 1)
 
+        # Make teeth (up and down)
         perp = rotation(gamma_p) * Y
 
         points = [
@@ -55,6 +56,7 @@ class BevelGearSection(Scene):
         ]
         up_tooth = Polygon(*points, color=WHITE)
 
+        # Make bevel gear body
         rev_points = [vec3(p.x, -p.y, 0) for p in points]
         down_tooth = Polygon(*rev_points, color=WHITE)
 
@@ -76,18 +78,22 @@ class BevelGearSection(Scene):
             color=WHITE,
         )
 
+        # Make dashed lines
         p1 = rho0 * rotation(gamma_p) * X - 2 / 3 * kd * m * perp
         p2 = rho0 * rotation(gamma_p) * X + 2 / 3 * ka * m * perp
         dashed_lines = [
             DashedLine(O, p1, color=BLUE),
             DashedLine(O, p2, color=BLUE),
             DashedLine(O, rho1 * rotation(gamma_p) * X, color=YELLOW),
+            DashedLine(O, rho1 * rotation(gamma_b) * X, color=RED),
             DashedLine(O, vec3(p1.x, -p1.y, 0), color=BLUE),
             DashedLine(O, vec3(p2.x, -p2.y, 0), color=BLUE),
             DashedLine(O, rho1 * rotation(-gamma_p) * X, color=YELLOW),
+            DashedLine(O, rho1 * rotation(-gamma_b) * X, color=RED),
             DashedLine(O, rho1 * X),
         ]
 
+        # Rho representation
         rho_repr = VGroup(
             Line(perp * 0.5, perp * 1.2),
             Line(
@@ -106,12 +112,14 @@ class BevelGearSection(Scene):
             ),
         )
 
+        # Gamma representation
         gamma_repr = []
         kr = 0.4
         for tex, gamma, k, color in [
-            ("\\gamma_r", gamma_r, 0.4, BLUE),
-            ("\\gamma_p", gamma_p, 0.55, YELLOW),
-            ("\\gamma_f", gamma_f, 0.70, BLUE),
+            ("\\gamma_r", gamma_r, 0.34, BLUE),
+            ("\\gamma_b", gamma_b, 0.46, RED),
+            ("\\gamma_p", gamma_p, 0.58, YELLOW),
+            ("\\gamma_f", gamma_f, 0.7, BLUE),
         ]:
             gamma_repr.append(
                 VGroup(
@@ -129,6 +137,7 @@ class BevelGearSection(Scene):
                 )
             )
 
+        # ka and kd representations
         middle_line = Line(
             rho1 * 1.02 * rotation(gamma_p) * X, rho1 * 1.2 * rotation(gamma_p) * X
         )
@@ -140,14 +149,15 @@ class BevelGearSection(Scene):
             Line(
                 rho1 * 1.08 * rotation(gamma_p) * X + ka * m * perp * 1.5,
                 rho1 * 1.08 * rotation(gamma_p) * X - ka * m * perp * 0.5,
+                color=BLUE,
             ),
-            Cross(scale_factor=0.08, stroke_color=WHITE, stroke_width=3)
+            Cross(scale_factor=0.08, stroke_color=BLUE, stroke_width=3)
             .rotate(gamma_p)
             .move_to(rho1 * 1.08 * rotation(gamma_p) * X + ka * m * perp),
-            Cross(scale_factor=0.08, stroke_color=WHITE, stroke_width=3)
+            Cross(scale_factor=0.08, stroke_color=BLUE, stroke_width=3)
             .rotate(gamma_p)
             .move_to(rho1 * 1.08 * rotation(gamma_p) * X),
-            MathTex("k_a \\cdot m", font_size=32)
+            MathTex("k_a \\cdot m", font_size=32, color=BLUE)
             .move_to(rho1 * 1.1 * rotation(gamma_p) * X + ka * m * perp * 2.2),
         )
         kd_repr = VGroup(
@@ -158,17 +168,19 @@ class BevelGearSection(Scene):
             Line(
                 rho1 * 1.14 * rotation(gamma_p) * X - kd * m * perp * 1.5,
                 rho1 * 1.14 * rotation(gamma_p) * X + kd * m * perp * 0.5,
+                color=BLUE,
             ),
-            Cross(scale_factor=0.08, stroke_color=WHITE, stroke_width=3)
+            Cross(scale_factor=0.08, stroke_color=BLUE, stroke_width=3)
             .rotate(gamma_p)
             .move_to(rho1 * 1.14 * rotation(gamma_p) * X - kd * m * perp),
-            Cross(scale_factor=0.08, stroke_color=WHITE, stroke_width=3)
+            Cross(scale_factor=0.08, stroke_color=BLUE, stroke_width=3)
             .rotate(gamma_p)
             .move_to(rho1 * 1.14 * rotation(gamma_p) * X),
-            MathTex("k_d \\cdot m", font_size=32)
+            MathTex("k_d \\cdot m", font_size=32, color=BLUE)
             .move_to(rho1 * 1.13 * rotation(gamma_p) * X - kd * m * perp * 2),
         )
 
+        # rp representation
         rp_repr = VGroup(
             DoubleArrow(
                 rp / tan(gamma_p) * X,
@@ -194,3 +206,26 @@ class BevelGearSection(Scene):
             rp_repr,
         ).center()
         self.add(group)
+
+
+class SphericalRepr(Scene):
+
+    def construct(self):
+        z_pinion = 10
+        z = z_wheel = 20
+        m = 0.3
+        step = pi * m
+        ka = 1
+        kd = 1.25
+        pressure_angle = pi / 9
+        pitch_cone_angle = get_pitch_cone_angle(z_pinion, z_wheel)
+
+        gamma_p = pitch_cone_angle  # for convenience
+        gamma_b = asin(cos(pressure_angle) * sin(gamma_p))
+        cos_b, sin_b = cos(gamma_b), sin(gamma_b)
+        rp = z * step / (2 * pi)
+        rho1 = rp / sin(gamma_p)
+        rho0 = 2 * rho1 / 3
+        k = sin(gamma_p) / z
+        gamma_r = gamma_p - atan2(2 * kd * k, 1)
+        gamma_f = gamma_p + atan2(2 * ka * k, 1)
