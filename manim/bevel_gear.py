@@ -1,7 +1,7 @@
 from manim import *
 from glm import *
 from utils import *
-from utils.maths import O, X, Y, Z, rotation
+from utils.maths import O, X, Y, Z, rotation, anglebt
 from math import pi, atan2, sin, cos, asin, acos, tan
 
 
@@ -20,9 +20,39 @@ def get_pitch_cone_angle(
         The number of teeth on the bevel wheel
     shaft_angle : float
         The shaft angle
+
+    Returns
+    -------
+    float
+        The pitch cone angle
     """
     return atan2(sin(shaft_angle), ((z_wheel / z_pinion) + cos(shaft_angle)))
 
+
+def spherical_involute(cone_angle:float, t0:float, t:float) -> vec3:
+	"""
+	Return spherical involute function
+
+	Parameters
+    ----------
+    t : float
+        The angular position
+    t0 : float
+        The difference phase
+    cone_angle : float
+        The cone angle
+
+	Returns
+    -------
+    vec3
+		A point on the spherical involute
+	"""
+	cos_g, sin_g = cos(cone_angle), sin(cone_angle)
+	return vec3(
+		sin_g * cos(t * sin_g) * cos(t + t0) + sin(t * sin_g) * sin(t + t0),
+		sin_g * cos(t * sin_g) * sin(t + t0) - sin(t * sin_g) * cos(t + t0),
+		cos_g * cos(t * sin_g),
+	)
 
 class BevelGearSection(Scene):
     def construct(self):
@@ -555,6 +585,21 @@ class SphericalRepr(ThreeDScene):
             .move_to(rho1 * rotate(-gamma_b * 1.7, Z) * rotate(gamma_b * 1.2, Y) * X)
         )
 
+        # Add curve
+        ref = rho1 * rotate(-pi / 2 - phi, Z) * rotate(-pi / 2, X) * rotate(pi, Z) * spherical_involute(gamma_p, 0, 0)
+        angle = anglebt(positions["M"], ref)
+        rot = (
+            rotate(pi / 2, positions["Q"]) *
+            rotate(-epsilon, positions["O"]) *
+            rotate(-pi / 2 - phi - angle, Z) *
+            rotate(-pi / 2, X) * rotate(pi, Z)
+        )
+        curve = ParametricFunction(
+            lambda t: rho1 * rot * spherical_involute(gamma_p, 0, t),
+            t_range=[0, epsilon * 0.98], # 0.98 due to line width
+            color=YELLOW
+        )
+
         system0 = VGroup(
             Arrow3D(O, 1.1 * positions["P"]),
             Arrow3D(O, 1.1 * rotate(pi / 2, Z) * positions["P"]),
@@ -633,5 +678,6 @@ class SphericalRepr(ThreeDScene):
             rho1_repr,
             rb_repr,
             base_text,
+            curve,
         ).move_to(0.2 * Z)
         self.add(group, system0, system1, system2, system3)
