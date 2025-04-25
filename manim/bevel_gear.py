@@ -236,8 +236,6 @@ class SphericalRepr(ThreeDScene):
         self.set_camera_orientation(phi=75 * DEGREES, theta=-20 * DEGREES, zoom=0.7)
 
         rho1_circle = Circle(rho1, color=WHITE)
-        # arc = Arc(rho1, -pi / 2, angle=pi).rotate(pi / 2, Y, about_point=O).rotate(-pi / 6, Z, about_point=O)
-        # self.add(arc)
 
         rb = rho1 * sin(gamma_b)
         base_circle = (
@@ -248,7 +246,7 @@ class SphericalRepr(ThreeDScene):
         )
 
         positions = {
-            "O": rho1 * cos(gamma_b) * rotate(gamma_b, Y) * X,
+            "O": rho1 * rotate(gamma_b, Y) * X,
             "P": rho1 * rotate(phi, Z) * X,
             "M": rho1 * X,
             "Q": rho1 * rotate(-epsilon, rotate(gamma_b, Y) * X) * X,
@@ -259,7 +257,7 @@ class SphericalRepr(ThreeDScene):
             MathTex("O")
             .rotate(75 * DEGREES, X, about_point=O)
             .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
-            .move_to(rho1 * cos(gamma_b) * rotate(gamma_b, Y) * (X - 0.07 * Z - 0.03 * Y)),
+            .move_to(rho1 * rotate(gamma_b, Y) * (X - 0.03 * Z - 0.06 * Y)),
         )
 
         P = VGroup(
@@ -294,11 +292,268 @@ class SphericalRepr(ThreeDScene):
         shapes = [sphere, cone]
 
         lines = [
-            Line3D(positions["O"], positions["Q"]),
-            Line3D(positions["O"], positions["M"]),
             DashedLine(O, positions["O"], dash_length=0.2, color=GREEN),
-            DashedLine(O, rotate(-epsilon, positions["O"]) * rotate(pi / 2, Z) * positions["M"], dash_length=0.2, color=BLUE),
+            # DashedLine(O, rotate(-epsilon, positions["O"]) * rotate(pi / 2, Z) * positions["M"], dash_length=0.2, color=BLUE),
         ]
+
+        n = 10
+        # Manim is BUGGED ! If you set normal_vector, it does NOT work. I created my own arcs
+        # Arc between O and M
+        lines += [
+            Line(
+                rotate(gamma_b * i / n, cross(positions["O"], positions["M"])) * positions["O"],
+                rotate(gamma_b * (i + 1) / n, cross(positions["O"], positions["M"])) * positions["O"],
+                color=GREEN,
+            ) for i in range(n)
+        ] + [
+            Line(
+                rotate(gamma_b * (i + 0.5) / n, cross(positions["O"], positions["M"])) * positions["O"],
+                rotate(gamma_b * (i + 1.5) / n, cross(positions["O"], positions["M"])) * positions["O"],
+                color=GREEN,
+            ) for i in range(n - 1)
+        ]
+
+        # Arc between O and Q
+        lines += [
+            Line(
+                rotate(gamma_b * i / n, cross(positions["O"], positions["Q"])) * positions["O"],
+                rotate(gamma_b * (i + 1) / n, cross(positions["O"], positions["Q"])) * positions["O"],
+                color=BLUE,
+            ) for i in range(n)
+        ] + [
+            Line(
+                rotate(gamma_b * (i + 0.5) / n, cross(positions["O"], positions["Q"])) * positions["O"],
+                rotate(gamma_b * (i + 1.5) / n, cross(positions["O"], positions["Q"])) * positions["O"],
+                color=BLUE,
+            ) for i in range(n - 1)
+        ]
+
+        # epsilon (OM, OQ)
+        arrows = [
+            Line(
+                rotate(-epsilon * i / n, rotate(gamma_b, Y) * X) * rho1 * rotate(gamma_b * 0.5, Y) * X,
+                rotate(-epsilon * (i + 1) / n, rotate(gamma_b, Y) * X) * rho1 * rotate(gamma_b * 0.5, Y) * X,
+                color=BLUE,
+            ) for i in range(n)
+        ] + [
+            Line(
+                rotate(-epsilon * (i + 0.5) / n, rotate(gamma_b, Y) * X) * rho1 * rotate(gamma_b * 0.5, Y) * X,
+                rotate(-epsilon * (i + 1.5) / n, rotate(gamma_b, Y) * X) * rho1 * rotate(gamma_b * 0.5, Y) * X,
+                color=BLUE,
+            ) for i in range(n - 1)
+        ] + [
+            Arrow3D(
+                rotate(-epsilon * 1 / n, rotate(gamma_b, Y) * X) * rho1 * rotate(gamma_b * 0.5, Y) * X,
+                rotate(-epsilon * 0 / n, rotate(gamma_b, Y) * X) * rho1 * rotate(gamma_b * 0.5, Y) * X,
+                resolution=0,
+                height=0.15,
+                color=BLUE,
+            ),
+            Arrow3D(
+                rotate(-epsilon * 9 / n, rotate(gamma_b, Y) * X) * rho1 * rotate(gamma_b * 0.5, Y) * X,
+                rotate(-epsilon * 10 / n, rotate(gamma_b, Y) * X) * rho1 * rotate(gamma_b * 0.5, Y) * X,
+                resolution=0,
+                height=0.15,
+                color=BLUE,
+            ),
+            MathTex("\\epsilon", color=BLUE)
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(rotate(-epsilon * 0.5, rotate(gamma_b, Y) * X) * rho1 * rotate(gamma_b * 0.6, Y) * X),
+        ]
+
+        # gamma_b (O_S O, O_S M) where O_S is the origin
+        arrows += [
+            Line(
+                0.5 * rho1 * rotate(gamma_b * i / n, Y) * X,
+                0.5 * rho1 * rotate(gamma_b * (i + 1) / n, Y) * X,
+                color=GREEN,
+            ) for i in range(n)
+        ] + [
+            Line(
+                0.5 * rho1 * rotate(gamma_b * (i + 0.5) / n, Y) * X,
+                0.5 * rho1 * rotate(gamma_b * (i + 1.5) / n, Y) * X,
+                color=GREEN,
+            ) for i in range(n - 1)
+        ] + [
+            Arrow3D(
+                0.5 * rho1 * rotate(gamma_b * 1 / n, Y) * X,
+                0.5 * rho1 * rotate(gamma_b * 0 / n, Y) * X,
+                resolution=0,
+                height=0.1,
+                color=GREEN,
+            ),
+            Arrow3D(
+                0.5 * rho1 * rotate(gamma_b * 9 / n, Y) * X,
+                0.5 * rho1 * rotate(gamma_b * 10 / n, Y) * X,
+                resolution=0,
+                height=0.1,
+                color=GREEN,
+            ),
+            MathTex("\\gamma_b", color=GREEN)
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(0.4 * rho1 * rotate(gamma_b * 0.5, Y) * X),
+        ]
+
+        # phi (O_S M, O_S P) where O_S is the origin
+        arrows += [
+            Line(
+                0.5 * rho1 * rotate(phi * i / n, Z) * X,
+                0.5 * rho1 * rotate(phi * (i + 1) / n, Z) * X,
+                color=RED,
+            ) for i in range(n)
+        ] + [
+            Line(
+                0.5 * rho1 * rotate(phi * (i + 0.5) / n, Z) * X,
+                0.5 * rho1 * rotate(phi * (i + 1.5) / n, Z) * X,
+                color=RED,
+            ) for i in range(n - 1)
+        ] + [
+            Arrow3D(
+                0.5 * rho1 * rotate(phi * 1 / n, Z) * X,
+                0.5 * rho1 * rotate(phi * 0 / n, Z) * X,
+                resolution=0,
+                height=0.1,
+                color=RED,
+            ),
+            Arrow3D(
+                0.5 * rho1 * rotate(phi * 9 / n, Z) * X,
+                0.5 * rho1 * rotate(phi * 10 / n, Z) * X,
+                resolution=0,
+                height=0.1,
+                color=RED,
+            ),
+            MathTex("\\varphi", color=RED)
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(0.65 * rho1 * rotate(phi * 0.3, Z) * X),
+        ]
+
+        # epsilon (y2, y3)
+        arrows += [
+            Line(
+                rotate(-epsilon * i / n, rotate(gamma_b, Y) * X) * 0.7 * 0.5 * rho1 * rotate(gamma_b, Y) * Z,
+                rotate(-epsilon * (i + 1) / n, rotate(gamma_b, Y) * X) * 0.7 * 0.5 * rho1 * rotate(gamma_b, Y) * Z,
+                color=BLUE,
+            ) for i in range(n)
+        ] + [
+            Line(
+                rotate(-epsilon * (i + 0.5) / n, rotate(gamma_b, Y) * X) * 0.7 * 0.5 * rho1 * rotate(gamma_b, Y) * Z,
+                rotate(-epsilon * (i + 1.5) / n, rotate(gamma_b, Y) * X) * 0.7 * 0.5 * rho1 * rotate(gamma_b, Y) * Z,
+                color=BLUE,
+            ) for i in range(n - 1)
+        ] + [
+            Arrow3D(
+                rotate(-epsilon * 1 / n, rotate(gamma_b, Y) * X) * 0.7 * 0.5 * rho1 * rotate(gamma_b, Y) * Z,
+                rotate(-epsilon * 0 / n, rotate(gamma_b, Y) * X) * 0.7 * 0.5 * rho1 * rotate(gamma_b, Y) * Z,
+                resolution=0,
+                height=0.15,
+                color=BLUE,
+            ),
+            Arrow3D(
+                rotate(-epsilon * 9 / n, rotate(gamma_b, Y) * X) * 0.7 * 0.5 * rho1 * rotate(gamma_b, Y) * Z,
+                rotate(-epsilon * 10 / n, rotate(gamma_b, Y) * X) * 0.7 * 0.5 * rho1 * rotate(gamma_b, Y) * Z,
+                resolution=0,
+                height=0.15,
+                color=BLUE,
+            ),
+            MathTex("\\epsilon", color=BLUE)
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(rotate(-epsilon * 0.5, rotate(gamma_b, Y) * X) * 0.8 * 0.5 * rho1 * rotate(gamma_b, Y) * Z),
+        ]
+
+        # gamma_b (y0, y2)
+        arrows += [
+            Line(
+                0.7 * 0.5 * rho1 * rotate(gamma_b * i / n, Y) * Z,
+                0.7 * 0.5 * rho1 * rotate(gamma_b * (i + 1) / n, Y) * Z,
+                color=GREEN,
+            ) for i in range(n)
+        ] + [
+            Line(
+                0.7 * 0.5 * rho1 * rotate(gamma_b * (i + 0.5) / n, Y) * Z,
+                0.7 * 0.5 * rho1 * rotate(gamma_b * (i + 1.5) / n, Y) * Z,
+                color=GREEN,
+            ) for i in range(n - 1)
+        ] + [
+            Arrow3D(
+                0.7 * 0.5 * rho1 * rotate(gamma_b * 1 / n, Y) * Z,
+                0.7 * 0.5 * rho1 * rotate(gamma_b * 0 / n, Y) * Z,
+                resolution=0,
+                height=0.1,
+                color=GREEN,
+            ),
+            Arrow3D(
+                0.7 * 0.5 * rho1 * rotate(gamma_b * 9 / n, Y) * Z,
+                0.7 * 0.5 * rho1 * rotate(gamma_b * 10 / n, Y) * Z,
+                resolution=0,
+                height=0.1,
+                color=GREEN,
+            ),
+            MathTex("\\gamma_b", color=GREEN)
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(0.8 * 0.5 * rho1 * rotate(gamma_b * 0.5, Y) * Z),
+        ]
+
+        # phi (x0, x1)
+        arrows += [
+            Line(
+                0.5 * rotate(phi * i / n, Z) * 1.1 * rho1 * Y,
+                0.5 * rotate(phi * (i + 1) / n, Z) * 1.1 * rho1 * Y,
+                color=RED,
+            ) for i in range(n)
+        ] + [
+            Line(
+                0.5 * rotate(phi * (i + 0.5) / n, Z) * 1.1 * rho1 * Y,
+                0.5 * rotate(phi * (i + 1.5) / n, Z) * 1.1 * rho1 * Y,
+                color=RED,
+            ) for i in range(n - 1)
+        ] + [
+            Arrow3D(
+                0.5 * rotate(phi * 1 / n, Z) * 1.1 * rho1 * Y,
+                0.5 * rotate(phi * 0 / n, Z) * 1.1 * rho1 * Y,
+                resolution=0,
+                height=0.1,
+                color=RED,
+            ),
+            Arrow3D(
+                0.5 * rotate(phi * 9 / n, Z) * 1.1 * rho1 * Y,
+                0.5 * rotate(phi * 10 / n, Z) * 1.1 * rho1 * Y,
+                resolution=0,
+                height=0.1,
+                color=RED,
+            ),
+            MathTex("\\varphi", color=RED)
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(0.65 * rotate(phi * 0.5, Z) * 1.1 * rho1 * Y),
+        ]
+
+        rho1_repr = VGroup(
+            Arrow3D(O, rho1 * rotate(-pi / 4, Z) * X),
+            MathTex("\\rho_1")
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(rho1 * 0.5 * rotate(-pi / 4 * 1.3, Z) * X),
+        )
+
+        rb_repr = VGroup(
+            Arrow3D(cos(gamma_b) * positions["O"], rho1 * rotate(epsilon, rotate(gamma_b, Y) * X) * X),
+            MathTex("r_b")
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(rho1 * rotate(epsilon, rotate(gamma_b, Y) * X) * rotate(gamma_b * 0.5, Y) * X),
+        )
+
+        base_text = (
+            Text("Base circle", font_size=32)
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(rho1 * rotate(-gamma_b * 1.7, Z) * rotate(gamma_b * 1.2, Y) * X)
+        )
 
         system0 = VGroup(
             Arrow3D(O, 1.1 * positions["P"]),
@@ -352,10 +607,18 @@ class SphericalRepr(ThreeDScene):
 
         system3 = VGroup(
             Arrow3D(O, 0.5 * rotate(-epsilon, positions["O"]) * rotate(-pi / 2, Y) * positions["O"]),
-            Arrow3D(
-                rotate(-epsilon, positions["O"]) * rotate(pi / 2, Z) * positions["M"],
-                1.1 * rotate(-epsilon, positions["O"]) * rotate(pi / 2, Z) * positions["M"]
-            ),
+            # Arrow3D(
+            #     rotate(-epsilon, positions["O"]) * rotate(pi / 2, Z) * positions["M"],
+            #     1.1 * rotate(-epsilon, positions["O"]) * rotate(pi / 2, Z) * positions["M"]
+            # ),
+            MathTex("\\overrightarrow{y_3}")
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(0.6 * rotate(-epsilon, positions["O"]) * rotate(-pi / 2, Y) * rho1 * cos(gamma_b) * rotate(gamma_b, Y) * X),
+            # MathTex("\\overrightarrow{x_3}")
+            # .rotate(75 * DEGREES, X, about_point=O)
+            # .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            # .move_to(1.2 * rotate(-epsilon, positions["O"]) * rotate(pi / 2, Z) * rho1 * X),
         )
         center = system3.get_center()
         system3 = system3.move_to(1.8 * Z + center).set_color(BLUE)
@@ -364,7 +627,11 @@ class SphericalRepr(ThreeDScene):
             *shapes,
             *points,
             *lines,
+            *arrows,
             rho1_circle,
             base_circle,
+            rho1_repr,
+            rb_repr,
+            base_text,
         ).move_to(0.2 * Z)
         self.add(group, system0, system1, system2, system3)
