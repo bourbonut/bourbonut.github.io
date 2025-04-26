@@ -272,6 +272,7 @@ def arc_with_arrows(
     tex_pos: vec3,
     n: int = 10,
     height: float = 0.15,
+    order: tuple[tuple[int, int], tuple[int, int]] = ((1, 0), (9, 10)),
     color: str | ManimColor = WHITE,
     phi_rot: float = 75 * DEGREES,
     theta_rot: float = pi / 2 - 20 * DEGREES,
@@ -291,6 +292,8 @@ def arc_with_arrows(
         Resolution of the arc
     height : float
         Height of arrows
+    order : tuple[tuple[int, int], tuple[int, int]]
+        Order used to orientate arrows
     color : str | ManimColor
         Color of the arc
     phi_rot : float
@@ -310,8 +313,8 @@ def arc_with_arrows(
         Line(func((i + 0.5) / n), func((i + 1.5) / n), color=color)
         for i in range(n - 1)
     ] + [
-        Arrow3D(func(1 / n), func(0 / n), resolution=0, height=0.1, color=color),
-        Arrow3D(func(9 / n), func(10 / n), resolution=0, height=height, color=color),
+        Arrow3D(func(order[0][0] / n), func(order[0][1] / n), resolution=0, height=0.1, color=color),
+        Arrow3D(func(order[1][0] / n), func(order[1][1] / n), resolution=0, height=height, color=color),
         MathTex(tex_content, color=color)
         .rotate(phi_rot, X, about_point=O)
         .rotate(theta_rot, Z, about_point=O)
@@ -419,7 +422,7 @@ class SphericalRepr(ThreeDScene):
         lines += arc(
             func=lambda t: rotate(gamma_b * t, cross(positions["O"], positions["Q"])) * positions["O"],
             n=n,
-            color=GREEN,
+            color=BLUE,
         )
 
         # epsilon (OM, OQ)
@@ -446,7 +449,7 @@ class SphericalRepr(ThreeDScene):
         arrows += arc_with_arrows(
             func=lambda t: 0.5 * rho1 * rotate(phi * t, Z) * X,
             tex_content="\\varphi",
-            tex_pos=0.65 * rho1 * rotate(phi * 0.3, Z) * X,
+            tex_pos=0.62 * rho1 * rotate(phi * 0.2, Z) * X,
             n=n,
             height=0.1,
             color=RED,
@@ -601,3 +604,245 @@ class SphericalRepr(ThreeDScene):
             curve,
         ).move_to(0.2 * Z)
         self.add(group, system0, system1, system2, system3)
+
+class SphericalRepr2(ThreeDScene):
+
+    def construct(self):
+        z_pinion = 10
+        z = z_wheel = 20
+        m = 0.3
+        step = pi * m
+        ka = 1
+        kd = 1.25
+        pressure_angle = pi / 9
+        pitch_cone_angle = get_pitch_cone_angle(z_pinion, z_wheel)
+
+        gamma_p = pitch_cone_angle  # for convenience
+        gamma_b = asin(cos(pressure_angle) * sin(gamma_p))
+        cos_b, sin_b = cos(gamma_b), sin(gamma_b)
+        rp = z * step / (2 * pi)
+        rho1 = rp / sin(gamma_p)
+        rho0 = 2 * rho1 / 3
+        k = sin(gamma_p) / z
+        gamma_r = gamma_p - atan2(2 * kd * k, 1)
+        gamma_f = gamma_p + atan2(2 * ka * k, 1)
+
+        epsilon = pi / 3
+        phi = epsilon * sin(gamma_b)
+
+        self.set_camera_orientation(phi=75 * DEGREES, theta=-20 * DEGREES, zoom=0.7)
+
+        rho1_circle = Circle(rho1, color=WHITE)
+
+        rb = rho1 * sin(gamma_b)
+        base_circle = (
+            Circle(radius=rb, color=WHITE)
+            .rotate(pi / 2, Y, about_point=O)
+            .move_to(rho1 * cos(gamma_b) * X)
+            .rotate(gamma_b, Y, about_point=O)
+        )
+
+        positions = {
+            "O": rho1 * rotate(gamma_b, Y) * X,
+            "P": rho1 * rotate(phi, Z) * X,
+            "M": rho1 * X,
+            "Q": rho1 * rotate(-epsilon, rotate(gamma_b, Y) * X) * X,
+        }
+
+        center = VGroup(
+            Dot3D(positions["O"]),
+            MathTex("O")
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(rho1 * rotate(gamma_b, Y) * (X - 0.03 * Z - 0.06 * Y)),
+        )
+
+        P = VGroup(
+            Dot3D(positions["P"]),
+            MathTex("P")
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(rho1 * rotate(phi, Z) * (X + 0.05 * Z + 0.06 * Y)),
+        )
+
+        M = VGroup(
+            Dot3D(positions["M"]),
+            MathTex("M")
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(rho1 * (X - 0.05 * Z - 0.06 * Y)),
+        )
+
+        Q = VGroup(
+            Dot3D(positions["Q"]),
+            MathTex("Q")
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(rho1 * rotate(-epsilon, rotate(gamma_b, Y) * X) * (X + 0.06 * Y + 0.08 * Z)),
+        )
+
+        points = [center, P, M, Q]
+
+        cone = Cone(rb, rho1 * cos(gamma_b), -rotate(gamma_b, Y) * X, fill_color=DARK_BLUE).set_opacity(0.05)
+        sphere = Sphere(radius=rho1, u_range=(0, pi), fill_color=DARK_GRAY).rotate(-pi / 2, X, about_point=O).set_opacity(0.01)
+
+        shapes = [sphere, cone]
+
+        lines = [
+            DashedLine(O, positions["O"], dash_length=0.2, color=GREEN),
+            Line3D(O, positions["P"], color=WHITE),
+            Line3D(O, positions["M"], color=RED),
+        ]
+
+        n = 10
+        # Manim is BUGGED ! If you set normal_vector, it does NOT work. I created my own arcs
+        # Arc between O and M
+        lines += arc(
+            func=lambda t: rotate(gamma_b * t, cross(positions["O"], positions["M"])) * positions["O"],
+            n=n,
+            color=GREEN,
+        )
+
+        # Arc between O and Q
+        lines += arc(
+            func=lambda t: rotate(gamma_b * t, cross(positions["O"], positions["Q"])) * positions["O"],
+            n=n,
+            color=BLUE,
+        )
+
+        # Missing angles
+        gamma = anglebt(positions["O"], positions["P"])
+        phi2 = anglebt(positions["M"] - positions["O"], positions["P"] - positions["O"])
+        theta = anglebt(positions["P"] - positions["O"], positions["Q"] - positions["O"])
+        eta = anglebt(positions["M"] - positions["P"], positions["O"] - positions["P"])
+
+        # Arc between O and P
+        lines += arc(
+            func=lambda t: rotate(gamma * t, cross(positions["O"], positions["P"])) * positions["O"],
+            n=n,
+            color=WHITE,
+        )
+
+        # epsilon (OM, OQ)
+        arrows = arc_with_arrows(
+            func=lambda t: rotate(-epsilon * t, rotate(gamma_b, Y) * X) * rho1 * rotate(gamma_b * 0.5, Y) * X,
+            tex_content="\\epsilon",
+            tex_pos=rotate(-epsilon * 0.5, rotate(gamma_b, Y) * X) * rho1 * rotate(gamma_b * 0.6, Y) * X,
+            n=n,
+            height=0.15,
+            color=BLUE,
+        )
+
+        # gamma_b (O_S O, O_S M) where O_S is the origin
+        arrows += arc_with_arrows(
+            func=lambda t: 0.5 * rho1 * rotate(gamma_b * t, Y) * X,
+            tex_content="\\gamma_b",
+            tex_pos=0.4 * rho1 * rotate(gamma_b * 0.5, Y) * X,
+            n=n,
+            height=0.1,
+            color=GREEN,
+        )
+
+        # phi (O_S M, O_S P) where O_S is the origin
+        arrows += arc_with_arrows(
+            func=lambda t: 0.5 * rho1 * rotate(phi * t, Z) * X,
+            tex_content="\\varphi",
+            tex_pos=0.62 * rho1 * rotate(phi * 0.2, Z) * X,
+            n=n,
+            height=0.1,
+            color=RED,
+        )
+
+        # phi2 (OM, OP)
+        arrows += arc_with_arrows(
+            func=lambda t: rho1 * rotate(-phi2 * t, positions["O"]) * rotate(gamma_b * 0.2, Y) * X,
+            tex_content="\\phi",
+            tex_pos=rho1 * rotate(-phi2 * 0.5, positions["O"]) * rotate(gamma_b * 0.1, Y) * X,
+            n=n,
+            height=0.1,
+            color=WHITE,
+        )
+
+        # theta (OP, OQ)
+        arrows += arc_with_arrows(
+            func=lambda t: rho1 * rotate(-theta * t - phi2, positions["O"]) * rotate(gamma_b * 0.2, Y) * X,
+            tex_content="\\theta",
+            tex_pos=rho1 * rotate(-theta * 0.5 - phi2, positions["O"]) * rotate(gamma_b * 0.1, Y) * X,
+            n=n,
+            height=0.05,
+            order=((-1, 0), (8, 9)),
+            color=WHITE,
+        )
+
+        # eta (PM, PO)
+        arrows += arc_with_arrows(
+            func=lambda t: rho1 * rotate(eta * t, positions["P"]) * rotate(phi * 0.7, Z) * X,
+            tex_content="\\eta",
+            tex_pos=rho1 * rotate(eta * 0.5, positions["P"]) * rotate(phi * 0.6, Z) * X,
+            n=n,
+            height=0.05,
+            order = ((-1, 0), (9, 10)),
+            color=WHITE,
+        )
+
+        # gamma (O_S O, O_S P) where O_S is the origin
+        arrows += arc_with_arrows(
+            func=lambda t: 0.5 * rotate(gamma * t, cross(positions["O"], positions["P"])) * positions["O"],
+            tex_content="\\gamma",
+            tex_pos=0.45 * rotate(gamma * 0.5, cross(positions["O"], positions["P"])) * positions["O"],
+            n=n,
+            height=0.1,
+            color=WHITE,
+        )
+
+        rho1_repr = VGroup(
+            Arrow3D(O, rho1 * rotate(-pi / 4, Z) * X),
+            MathTex("\\rho_1")
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(rho1 * 0.5 * rotate(-pi / 4 * 1.3, Z) * X),
+        )
+
+        rb_repr = VGroup(
+            Arrow3D(cos(gamma_b) * positions["O"], rho1 * rotate(epsilon, rotate(gamma_b, Y) * X) * X),
+            MathTex("r_b")
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(rho1 * rotate(epsilon, rotate(gamma_b, Y) * X) * rotate(gamma_b * 0.5, Y) * X),
+        )
+
+        base_text = (
+            Text("Base circle", font_size=32)
+            .rotate(75 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
+            .move_to(rho1 * rotate(-gamma_b * 1.7, Z) * rotate(gamma_b * 1.2, Y) * X)
+        )
+
+        # Add curve
+        ref = rho1 * rotate(-pi / 2 - phi, Z) * rotate(-pi / 2, X) * rotate(pi, Z) * spherical_involute(gamma_p, 0, 0)
+        angle = anglebt(positions["M"], ref)
+        rot = (
+            rotate(pi / 2, positions["Q"]) *
+            rotate(-epsilon, positions["O"]) *
+            rotate(-pi / 2 - phi - angle, Z) *
+            rotate(-pi / 2, X) * rotate(pi, Z)
+        )
+        curve = ParametricFunction(
+            lambda t: rho1 * rot * spherical_involute(gamma_p, 0, t),
+            t_range=[0, epsilon * 0.98], # 0.98 due to line width
+            color=YELLOW
+        )
+
+        group = VGroup(
+            *shapes,
+            *points,
+            *lines,
+            *arrows,
+            rho1_circle,
+            base_circle,
+            rho1_repr,
+            rb_repr,
+            base_text,
+            curve,
+        ).move_to(0.2 * Z)
+        self.add(group)
