@@ -509,17 +509,15 @@ class SphericalRepr(ThreeDScene):
         )
 
         # Add curve
-        ref = rho1 * rotate(-pi / 2 - phi, Z) * rotate(-pi / 2, X) * rotate(pi, Z) * spherical_involute(gamma_p, 0, 0)
-        angle = anglebt(positions["M"], ref)
         rot = (
             rotate(pi / 2, positions["Q"]) *
             rotate(-epsilon, positions["O"]) *
-            rotate(-pi / 2 - phi - angle, Z) *
+            rotate(-pi / 2 - phi, Z) *
             rotate(-pi / 2, X) * rotate(pi, Z)
         )
         curve = ParametricFunction(
-            lambda t: rho1 * rot * spherical_involute(gamma_p, 0, t),
-            t_range=[0, epsilon * 0.98], # 0.98 due to line width
+            lambda t: rho1 * rot * spherical_involute(gamma_b, 0, t),
+            t_range=[0, epsilon],
             color=YELLOW
         )
 
@@ -819,17 +817,15 @@ class SphericalRepr2(ThreeDScene):
         )
 
         # Add curve
-        ref = rho1 * rotate(-pi / 2 - phi, Z) * rotate(-pi / 2, X) * rotate(pi, Z) * spherical_involute(gamma_p, 0, 0)
-        angle = anglebt(positions["M"], ref)
         rot = (
             rotate(pi / 2, positions["Q"]) *
             rotate(-epsilon, positions["O"]) *
-            rotate(-pi / 2 - phi - angle, Z) *
+            rotate(-pi / 2 - phi, Z) *
             rotate(-pi / 2, X) * rotate(pi, Z)
         )
         curve = ParametricFunction(
-            lambda t: rho1 * rot * spherical_involute(gamma_p, 0, t),
-            t_range=[0, epsilon * 0.98], # 0.98 due to line width
+            lambda t: rho1 * rot * spherical_involute(gamma_b, 0, t),
+            t_range=[0, epsilon],
             color=YELLOW
         )
 
@@ -846,3 +842,306 @@ class SphericalRepr2(ThreeDScene):
             curve,
         ).move_to(0.2 * Z)
         self.add(group)
+
+
+class BevelAnimation(ThreeDScene):
+
+    def construct(self):
+        z_pinion = 10
+        z = z_wheel = 20
+        m = 0.3
+        step = pi * m
+        ka = 1
+        kd = 1.25
+        pressure_angle = pi / 9
+        pitch_cone_angle = get_pitch_cone_angle(z_pinion, z_wheel)
+
+        gamma_p = pitch_cone_angle  # for convenience
+        gamma_b = asin(cos(pressure_angle) * sin(gamma_p))
+        cos_b, sin_b = cos(gamma_b), sin(gamma_b)
+        rp = z * step / (2 * pi)
+        rho1 = rp / sin(gamma_p)
+        rho0 = 2 * rho1 / 3
+        k = sin(gamma_p) / z
+        gamma_r = gamma_p - atan2(2 * kd * k, 1)
+        gamma_f = gamma_p + atan2(2 * ka * k, 1)
+
+        # self.set_camera_orientation(phi=110 * DEGREES, theta=-50 * DEGREES, zoom=0.5, focal_distance=1000)
+        self.set_camera_orientation(phi=pi / 2, theta=pi / 2, zoom=0.4, focal_distance=1000)
+
+        rb = rho1 * sin(gamma_b)
+
+        rho1_circle = (
+            VGroup(
+                Circle(rho1, color=WHITE, fill_opacity=0.2)
+                .rotate_about_origin(pi / 2 - gamma_b, Y),
+                # Arrow3D(O, rho1 * rotate(-gamma_b, Y) *  Z),
+                # Arrow3D(rho1 * rotate(-gamma_b, Y) *  Z, rho1 * rotate(-gamma_b, Y) *  Z + rb * Y),
+                Dot3D(rho1 * rotate(-gamma_b, Y) * Z, radius=0.16),
+            )
+        )
+
+        base_circle = (
+            Circle(radius=rb, color=WHITE)
+            .move_to(rho1 * cos(gamma_b) * Z)
+        )
+        cone = Cone(rb, rho1 * cos(gamma_b), -Z, fill_color=DARK_BLUE).set_opacity(0.05)
+        sphere = Sphere(radius=rho1, fill_color=DARK_GRAY).set_opacity(0.01)
+
+        shapes = [rho1_circle, base_circle, cone, sphere]
+
+        dots = [
+            Dot3D(O, radius=0.16),
+            Dot3D(rho1 * cos(gamma_b) * Z, radius=0.16),
+            Dot3D(rho1 * rotate(-gamma_b, Y) * Z, radius=0.16),
+        ]
+
+        lines = [
+            DashedLine(-1.5 * rho1 * Z, 1.5 * rho1 * Z, dash_length=0.2),
+            DashedLine(rho1 * cos(gamma_b) * Z + rb * X, rho1 * cos(gamma_b) * Z - rb * X, dash_length=0.2),
+            DashedLine(O, rho1 * rotate(-gamma_b, Y) * Z, dash_length=0.2),
+        ]
+
+        group = VGroup(*shapes, *dots, *lines)
+
+        t0 = pi / 6
+        t = 2 * pi / 5
+
+        self.add(group)
+
+        self.wait()
+        self.move_camera(phi=110 * DEGREES, theta=-50 * DEGREES, zoom=0.5, focal_distance=1000)
+        self.wait()
+        self.play(Rotate(rho1_circle, angle=-t0, axis=Z, about_point=O))
+
+
+        # rho1_circle = rho1_circle.rotate(-t0 - t, Z, about_point=O)
+
+        t0_line = VGroup(
+            Line(rho1 * cos(gamma_b) * Z, rho1 * rotate(-t0, Z) * rotate(-gamma_b, Y) * Z),
+            Dot3D(rho1 * rotate(-t0, Z) * rotate(-gamma_b, Y) * Z, radius=0.16)
+        )
+
+        t1_line = Line(rho1 * cos(gamma_b) * Z, rho1 * rotate(-t - t0, Z) * rotate(-gamma_b, Y) * Z)
+
+        curve = ParametricFunction(
+            lambda t: rho1 * rotate(-pi, Z) * spherical_involute(gamma_b, -t0, -t),
+            t_range=[0, t],
+            color=RED,
+        )
+
+        arc_rb = (
+            Arc(radius=rb, angle=t, arc_center=rho1 * cos(gamma_b) * Z, color=ORANGE)
+            .rotate_about_origin(pi - t - t0, Z)
+        )
+        arc_rho1 = (
+            Arc(radius=rho1, angle=t0, arc_center=O, color=ORANGE)
+            .rotate_about_origin(pi / 2 - gamma_b, Y)
+            .rotate_about_origin(-t - t0, Z)
+            .rotate_about_origin(pi, rotate(-t - t0, Z) * rotate(pi / 2 - gamma_b, Y) * Z)
+        )
+        sector = (
+            Sector(rb, angle=t, fill_color=GREEN, fill_opacity=0.7, arc_center=rho1 * cos(gamma_b) * Z)
+            .rotate_about_origin(pi - t - t0, Z)
+        )
+
+        theta_dot = Dot3D(rho1 * rotate(-pi, Z) * spherical_involute(gamma_b, -t0, -t), radius=0.16, color=WHITE)
+
+        self.play(Create(t0_line), Create(t1_line))
+        self.play(
+            Rotate(rho1_circle, angle=-t, axis=Z, about_point=O, run_time=2.5, run_func=linear),
+            Create(curve, run_time=2.5, run_func=linear),
+            Create(sector, run_time=2.5, run_func=linear),
+        )
+        self.wait()
+        self.play(
+            Create(theta_dot, run_func=linear),
+            Create(arc_rb, run_func=linear),
+            Create(arc_rho1, run_func=linear),
+        )
+        self.wait()
+
+class BevelStaticInvolute(ThreeDScene):
+
+    def construct(self):
+        z_pinion = 10
+        z = z_wheel = 20
+        m = 0.3
+        step = pi * m
+        ka = 1
+        kd = 1.25
+        pressure_angle = pi / 9
+        pitch_cone_angle = get_pitch_cone_angle(z_pinion, z_wheel)
+
+        gamma_p = pitch_cone_angle  # for convenience
+        gamma_b = asin(cos(pressure_angle) * sin(gamma_p))
+        cos_b, sin_b = cos(gamma_b), sin(gamma_b)
+        rp = z * step / (2 * pi)
+        rho1 = rp / sin(gamma_p)
+        rho0 = 2 * rho1 / 3
+        k = sin(gamma_p) / z
+        gamma_r = gamma_p - atan2(2 * kd * k, 1)
+        gamma_f = gamma_p + atan2(2 * ka * k, 1)
+
+        self.set_camera_orientation(phi=110 * DEGREES, theta=-50 * DEGREES, zoom=0.5, focal_distance=1000)
+
+        rb = rho1 * sin(gamma_b)
+
+        gamma_arrow = Arrow3D(O, rho1 * rotate(-gamma_b, Y) *  Z)
+        gamma_prime_arrow = Arrow3D(rho1 * rotate(-gamma_b, Y) *  Z, rho1 * rotate(-gamma_b, Y) *  Z + rb * Y)
+        rho1_circle = (
+            VGroup(
+                Circle(rho1, color=WHITE, fill_opacity=0.2)
+                .rotate_about_origin(pi / 2 - gamma_b, Y),
+                gamma_arrow,
+                gamma_prime_arrow,
+                Dot3D(rho1 * rotate(-gamma_b, Y) * Z, radius=0.16),
+            )
+        )
+
+        base_circle = (
+            Circle(radius=rb, color=WHITE)
+            .move_to(rho1 * cos(gamma_b) * Z)
+        )
+        cone = Cone(rb, rho1 * cos(gamma_b), -Z, fill_color=DARK_BLUE).set_opacity(0.05)
+        sphere = Sphere(radius=rho1, fill_color=DARK_GRAY).set_opacity(0.01)
+
+        shapes = [rho1_circle, base_circle, cone, sphere]
+
+        dots = [
+            Dot3D(O, radius=0.16),
+            Dot3D(rho1 * cos(gamma_b) * Z, radius=0.16),
+            Dot3D(rho1 * rotate(-gamma_b, Y) * Z, radius=0.16),
+        ]
+
+        lines = [
+            DashedLine(-1.5 * rho1 * Z, 1.5 * rho1 * Z, dash_length=0.2),
+            DashedLine(rho1 * cos(gamma_b) * Z + rb * X, rho1 * cos(gamma_b) * Z - rb * X, dash_length=0.2),
+            DashedLine(O, rho1 * rotate(-gamma_b, Y) * Z, dash_length=0.2),
+        ]
+
+        group = VGroup(*shapes, *dots, *lines)
+
+        t0 = pi / 6
+        t = 2 * pi / 5
+
+        rho1_circle = rho1_circle.rotate(-t0 - t, Z, about_point=O)
+
+        t0_line = VGroup(
+            Line(rho1 * cos(gamma_b) * Z, rho1 * rotate(-t0, Z) * rotate(-gamma_b, Y) * Z),
+            Dot3D(rho1 * rotate(-t0, Z) * rotate(-gamma_b, Y) * Z, radius=0.16)
+        )
+
+        t1_line = Line(rho1 * cos(gamma_b) * Z, rho1 * rotate(-t - t0, Z) * rotate(-gamma_b, Y) * Z)
+
+        curve = ParametricFunction(
+            lambda t: rho1 * rotate(-pi, Z) * spherical_involute(gamma_b, -t0, -t),
+            t_range=[0, t],
+            color=RED,
+        )
+
+        arc_rb = (
+            Arc(radius=rb, angle=t, arc_center=rho1 * cos(gamma_b) * Z, color=ORANGE)
+            .rotate_about_origin(pi - t - t0, Z)
+        )
+        arc_rho1 = (
+            Arc(radius=rho1, angle=t0, arc_center=O, color=ORANGE)
+            .rotate_about_origin(pi / 2 - gamma_b, Y)
+            .rotate_about_origin(-t - t0, Z)
+            .rotate_about_origin(pi, rotate(-t - t0, Z) * rotate(pi / 2 - gamma_b, Y) * Z)
+        )
+        sector = (
+            Sector(rb, angle=t, fill_color=GREEN, fill_opacity=0.7, arc_center=rho1 * cos(gamma_b) * Z)
+            .rotate_about_origin(pi - t - t0, Z)
+        )
+        theta_dot = Dot3D(rho1 * rotate(-pi, Z) * spherical_involute(gamma_b, -t0, -t), radius=0.16, color=WHITE)
+
+        rho1_arrow = Arrow3D(O, -rho1 * rotate(-t - t0, Z) * rotate(-gamma_b, Y) *  Z)
+        rho1_group = VGroup(
+            rho1_arrow,
+            MathTex("\\rho_1")
+            .rotate(110 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 50 * DEGREES, Z, about_point=O)
+            .next_to(rho1_arrow)
+        )
+
+        t0_tex = (
+            MathTex("t_0")
+            .rotate(110 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 50 * DEGREES, Z, about_point=O)
+            .next_to(rho1 * rotate(-t0, Z) * rotate(-gamma_b, Y) * Z, direction=Z)
+        )
+
+        t_tex = (
+            MathTex("t")
+            .rotate(110 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 50 * DEGREES, Z, about_point=O)
+            .next_to(rho1 * rotate(-t - t0, Z) * rotate(-gamma_b, Y) * Z, direction=Z)
+        )
+
+        gamma_tex = (
+            MathTex("\\overrightarrow{\\gamma(t)}")
+            .rotate(110 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 50 * DEGREES, Z, about_point=O)
+            .next_to(gamma_arrow)
+        )
+
+        gamma_prime = (
+            MathTex("\\overrightarrow{\\gamma'(t)}")
+            .rotate(110 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 50 * DEGREES, Z, about_point=O)
+            .next_to(gamma_prime_arrow, direction=RIGHT)
+        )
+
+        rb_arrow = Arrow3D(rho1 * cos(gamma_b) * Z, rho1 * cos(gamma_b) * Z - rb * Y)
+        rb_group = VGroup(
+            rb_arrow,
+            MathTex("r_b")
+            .rotate(110 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 50 * DEGREES, Z, about_point=O)
+            .next_to(rb_arrow)
+        )
+
+        theta_tex = (
+            MathTex("\\theta(t)")
+            .rotate(110 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 50 * DEGREES, Z, about_point=O)
+            .next_to(theta_dot, direction=normalize(X + Y))
+        )
+
+        system = VGroup(
+            Arrow3D(O, -0.4 * rho1 * X),
+            Arrow3D(O, 0.4 * rho1 * Y),
+            Arrow3D(O, 0.4 * rho1 * Z),
+            MathTex("\\overrightarrow{x}")
+            .rotate(110 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 50 * DEGREES, Z, about_point=O)
+            .next_to(-0.4 * rho1 * X, direction=-X),
+            MathTex("\\overrightarrow{y}")
+            .rotate(110 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 50 * DEGREES, Z, about_point=O)
+            .next_to(0.4 * rho1 * Y),
+            MathTex("\\overrightarrow{z}")
+            .rotate(110 * DEGREES, X, about_point=O)
+            .rotate(pi / 2 - 50 * DEGREES, Z, about_point=O)
+            .next_to(0.4 * rho1 * Z),
+        )
+
+        self.add(
+            group,
+            t0_line,
+            t1_line,
+            curve,
+            sector,
+            arc_rb,
+            arc_rho1,
+            theta_dot,
+            rho1_group,
+            t0_tex,
+            t_tex,
+            gamma_tex,
+            gamma_prime,
+            rb_group,
+            theta_tex,
+            system,
+        )
