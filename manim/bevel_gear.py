@@ -632,7 +632,7 @@ class SphericalRepr2(ThreeDScene):
         epsilon = pi / 3
         phi = epsilon * sin(gamma_b)
 
-        self.set_camera_orientation(phi=75 * DEGREES, theta=-20 * DEGREES, zoom=0.7)
+        self.set_camera_orientation(phi=75 * DEGREES, theta=-20 * DEGREES, zoom=0.7, focal_distance=1000)
 
         rho1_circle = Circle(rho1, color=WHITE)
 
@@ -656,7 +656,7 @@ class SphericalRepr2(ThreeDScene):
             MathTex("O")
             .rotate(75 * DEGREES, X, about_point=O)
             .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
-            .move_to(rho1 * rotate(gamma_b, Y) * (X - 0.03 * Z - 0.06 * Y)),
+            .next_to(positions["O"], direction=-normalize(Z + Y)),
         )
 
         P = VGroup(
@@ -664,7 +664,7 @@ class SphericalRepr2(ThreeDScene):
             MathTex("P")
             .rotate(75 * DEGREES, X, about_point=O)
             .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
-            .move_to(rho1 * rotate(phi, Z) * (X + 0.05 * Z + 0.06 * Y)),
+            .next_to(positions["P"], direction=normalize(Z + Y)),
         )
 
         M = VGroup(
@@ -672,7 +672,7 @@ class SphericalRepr2(ThreeDScene):
             MathTex("M")
             .rotate(75 * DEGREES, X, about_point=O)
             .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
-            .move_to(rho1 * (X - 0.05 * Z - 0.06 * Y)),
+            .next_to(positions["M"], direction=-normalize(Z + Y)),
         )
 
         Q = VGroup(
@@ -680,7 +680,7 @@ class SphericalRepr2(ThreeDScene):
             MathTex("Q")
             .rotate(75 * DEGREES, X, about_point=O)
             .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
-            .move_to(rho1 * rotate(-epsilon, rotate(gamma_b, Y) * X) * (X + 0.06 * Y + 0.08 * Z)),
+            .next_to(positions["Q"], direction=Y),
         )
 
         points = [center, P, M, Q]
@@ -729,7 +729,7 @@ class SphericalRepr2(ThreeDScene):
         arrows = arc_with_arrows(
             func=lambda t: rotate(-epsilon * t, rotate(gamma_b, Y) * X) * rho1 * rotate(gamma_b * 0.5, Y) * X,
             tex_content="\\epsilon",
-            tex_pos=rotate(-epsilon * 0.5, rotate(gamma_b, Y) * X) * rho1 * rotate(gamma_b * 0.6, Y) * X,
+            direction=0.5 * normalize(Z + Y),
             n=n,
             height=0.15,
             color=BLUE,
@@ -739,7 +739,7 @@ class SphericalRepr2(ThreeDScene):
         arrows += arc_with_arrows(
             func=lambda t: 0.5 * rho1 * rotate(gamma_b * t, Y) * X,
             tex_content="\\gamma_b",
-            tex_pos=0.4 * rho1 * rotate(gamma_b * 0.5, Y) * X,
+            direction=Y,
             n=n,
             height=0.1,
             color=GREEN,
@@ -749,7 +749,7 @@ class SphericalRepr2(ThreeDScene):
         arrows += arc_with_arrows(
             func=lambda t: 0.5 * rho1 * rotate(phi * t, Z) * X,
             tex_content="\\varphi",
-            tex_pos=0.62 * rho1 * rotate(phi * 0.2, Z) * X,
+            direction=0.5 * normalize(X - Z),
             n=n,
             height=0.1,
             color=RED,
@@ -759,7 +759,7 @@ class SphericalRepr2(ThreeDScene):
         arrows += arc_with_arrows(
             func=lambda t: rho1 * rotate(-phi2 * t, positions["O"]) * rotate(gamma_b * 0.2, Y) * X,
             tex_content="\\phi",
-            tex_pos=rho1 * rotate(-phi2 * 0.5, positions["O"]) * rotate(gamma_b * 0.1, Y) * X,
+            direction=0.5 * normalize(Z + Y),
             n=n,
             height=0.1,
             color=WHITE,
@@ -769,7 +769,7 @@ class SphericalRepr2(ThreeDScene):
         arrows += arc_with_arrows(
             func=lambda t: rho1 * rotate(-theta * t - phi2, positions["O"]) * rotate(gamma_b * 0.2, Y) * X,
             tex_content="\\theta",
-            tex_pos=rho1 * rotate(-theta * 0.5 - phi2, positions["O"]) * rotate(gamma_b * 0.1, Y) * X,
+            direction=0.5 * normalize(0.5 * Z + Y),
             n=n,
             height=0.05,
             order=((-1, 0), (8, 9)),
@@ -780,7 +780,7 @@ class SphericalRepr2(ThreeDScene):
         arrows += arc_with_arrows(
             func=lambda t: rho1 * rotate(eta * t, positions["P"]) * rotate(phi * 0.7, Z) * X,
             tex_content="\\eta",
-            tex_pos=rho1 * rotate(eta * 0.5, positions["P"]) * rotate(phi * 0.6, Z) * X,
+            direction=-0.2 * rotate(eta * 0.5, X) * Y,
             n=n,
             height=0.05,
             order = ((-1, 0), (9, 10)),
@@ -791,7 +791,7 @@ class SphericalRepr2(ThreeDScene):
         arrows += arc_with_arrows(
             func=lambda t: 0.5 * rotate(gamma * t, cross(positions["O"], positions["P"])) * positions["O"],
             tex_content="\\gamma",
-            tex_pos=0.45 * rotate(gamma * 0.5, cross(positions["O"], positions["P"])) * positions["O"],
+            direction=Y,
             n=n,
             height=0.1,
             color=WHITE,
@@ -802,22 +802,25 @@ class SphericalRepr2(ThreeDScene):
             MathTex("\\rho_1")
             .rotate(75 * DEGREES, X, about_point=O)
             .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
-            .move_to(rho1 * 0.5 * rotate(-pi / 4 * 1.3, Z) * X),
+            .next_to(rho1 * 0.5 * rotate(-pi / 4, Z) * X, direction=Z),
         )
 
         rb_repr = VGroup(
-            Arrow3D(cos(gamma_b) * positions["O"], rho1 * rotate(epsilon, rotate(gamma_b, Y) * X) * X),
+            Arrow3D(cos(gamma_b) * positions["O"], rho1 * rotate(epsilon, positions["O"]) * X),
             MathTex("r_b")
             .rotate(75 * DEGREES, X, about_point=O)
             .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
-            .move_to(rho1 * rotate(epsilon, rotate(gamma_b, Y) * X) * rotate(gamma_b * 0.5, Y) * X),
+            .next_to(
+                rho1 * cos(gamma_b) / cos(gamma_b * 0.5) * rotate(epsilon, positions["O"]) * rotate(0.5 * gamma_b, Y) * X,
+                direction=-Z
+            ),
         )
 
         base_text = (
             Text("Base circle", font_size=32)
             .rotate(75 * DEGREES, X, about_point=O)
             .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
-            .move_to(rho1 * rotate(-gamma_b * 1.7, Z) * rotate(gamma_b * 1.2, Y) * X)
+            .next_to(base_circle, direction=-Y)
         )
 
         # Add curve
