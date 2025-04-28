@@ -57,9 +57,9 @@ def spherical_involute(cone_angle:float, t0:float, t:float) -> vec3:
 
 class BevelGearSection(Scene):
     def construct(self):
-        z_pinion = 10
-        z = z_wheel = 20
-        m = 0.3
+        z = z_pinion = 10
+        z_wheel = 20
+        m = 0.5
         step = pi * m
         ka = 1
         kd = 1.25
@@ -272,7 +272,7 @@ def arc_with_arrows(
     direction: vec3 = Y,
     n: int = 10,
     height: float = 0.15,
-    order: tuple[tuple[int, int], tuple[int, int]] = ((1, 0), (9, 10)),
+    reverse: bool = False,
     color: str | ManimColor = WHITE,
     phi_rot: float = 75 * DEGREES,
     theta_rot: float = pi / 2 - 20 * DEGREES,
@@ -292,8 +292,8 @@ def arc_with_arrows(
         Resolution of the arc
     height : float
         Height of arrows
-    order : tuple[tuple[int, int], tuple[int, int]]
-        Order used to orientate arrows
+    reverse : bool
+        Reverse arrows
     color : str | ManimColor
         Color of the arc
     phi_rot : float
@@ -306,6 +306,7 @@ def arc_with_arrows(
     list[VMobject]
         List of VMobject which composes the arc
     """
+    s1, s2, e1, e2 = (0, 1, 10, 9) if reverse else (1, 0, 9, 10)
     return [
         Line(func(i / n), func((i + 1) / n), color=color)
         for i in range(n)
@@ -313,8 +314,8 @@ def arc_with_arrows(
         Line(func((i + 0.5) / n), func((i + 1.5) / n), color=color)
         for i in range(n - 1)
     ] + [
-        Arrow3D(func(order[0][0] / n), func(order[0][1] / n), resolution=0, height=0.1, color=color),
-        Arrow3D(func(order[1][0] / n), func(order[1][1] / n), resolution=0, height=height, color=color),
+        Arrow3D(func(s1 / n), func(s2 / n), resolution=0, thickness=0, height=height, color=color),
+        Arrow3D(func(e1 / n), func(e2 / n), resolution=0, thickness=0, height=height, color=color),
         MathTex(tex_content, color=color)
         .rotate(phi_rot, X, about_point=O)
         .rotate(theta_rot, Z, about_point=O)
@@ -324,9 +325,9 @@ def arc_with_arrows(
 class SphericalRepr(ThreeDScene):
 
     def construct(self):
-        z_pinion = 10
-        z = z_wheel = 20
-        m = 0.3
+        z = z_pinion = 10
+        z_wheel = 20
+        m = 0.5
         step = pi * m
         ka = 1
         kd = 1.25
@@ -346,7 +347,7 @@ class SphericalRepr(ThreeDScene):
         epsilon = pi / 3
         phi = epsilon * sin(gamma_b)
 
-        self.set_camera_orientation(phi=75 * DEGREES, theta=-20 * DEGREES, zoom=0.7, focal_distance=1000)
+        self.set_camera_orientation(phi=75 * DEGREES, theta=-20 * DEGREES, zoom=0.8, focal_distance=1000)
 
         rho1_circle = Circle(rho1, color=WHITE)
 
@@ -431,7 +432,7 @@ class SphericalRepr(ThreeDScene):
             tex_content="\\epsilon",
             direction=0.5 * normalize(Z + Y),
             n=n,
-            height=0.15,
+            height=0.1,
             color=BLUE,
         )
 
@@ -471,13 +472,13 @@ class SphericalRepr(ThreeDScene):
             tex_content="\\gamma_b",
             direction=-Y,
             n=n,
-            height=0.1,
+            height=0.05,
             color=GREEN,
         )
 
         # phi (x0, x1)
         arrows += arc_with_arrows(
-            func=lambda t: 0.5 * rotate(phi * t, Z) * 1.1 * rho1 * Y,
+            func=lambda t: 0.5 * rotate(phi * t, Z) * rho1 * Y,
             tex_content="\\varphi",
             direction=normalize(-X + 1.5 * Y),
             n=n,
@@ -541,8 +542,6 @@ class SphericalRepr(ThreeDScene):
             .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
             .next_to(0.5 * rho1 * Z, direction=Y),
         )
-        center = system0.get_center()
-        system0 = system0.move_to(1.8 * Z + center)
 
         system1 = VGroup(
             Arrow3D(O, 1.1 * positions["M"]),
@@ -555,9 +554,7 @@ class SphericalRepr(ThreeDScene):
             .rotate(75 * DEGREES, X, about_point=O)
             .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
             .next_to(1.1 * positions["M"], direction=positions["M"] / rho1),
-        )
-        center = system1.get_center()
-        system1 = system1.move_to(1.8 * Z + center).set_color(RED)
+        ).set_color(RED)
 
         system2 = VGroup(
             Arrow3D(positions["O"], 1.1 * positions["O"]),
@@ -570,9 +567,7 @@ class SphericalRepr(ThreeDScene):
             .rotate(75 * DEGREES, X, about_point=O)
             .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
             .next_to(1.1 * positions["O"], direction=positions["O"] / rho1),
-        )
-        center = system2.get_center()
-        system2 = system2.move_to(1.8 * Z + center).set_color(GREEN)
+        ).set_color(GREEN)
 
         system3 = VGroup(
             Arrow3D(O, 0.5 * rotate(-epsilon, positions["O"]) * rotate(-pi / 2, Y) * positions["O"]),
@@ -588,9 +583,7 @@ class SphericalRepr(ThreeDScene):
             # .rotate(75 * DEGREES, X, about_point=O)
             # .rotate(pi / 2 - 20 * DEGREES, Z, about_point=O)
             # .move_to(1.2 * rotate(-epsilon, positions["O"]) * rotate(pi / 2, Z) * rho1 * X),
-        )
-        center = system3.get_center()
-        system3 = system3.move_to(1.8 * Z + center).set_color(BLUE)
+        ).set_color(BLUE)
 
         group = VGroup(
             *shapes,
@@ -603,16 +596,20 @@ class SphericalRepr(ThreeDScene):
             rb_repr,
             base_text,
             curve,
-        ).move_to(0.2 * Z)
-        # self.add(group)
-        self.add(group, system0, system1, system2, system3)
+            system0,
+            system1,
+            system2,
+            system3,
+        )
+
+        self.add(group.move_to(0.2 * Z + Y))
 
 class SphericalRepr2(ThreeDScene):
 
     def construct(self):
-        z_pinion = 10
-        z = z_wheel = 20
-        m = 0.3
+        z = z_pinion = 10
+        z_wheel = 20
+        m = 0.5
         step = pi * m
         ka = 1
         kd = 1.25
@@ -632,7 +629,7 @@ class SphericalRepr2(ThreeDScene):
         epsilon = pi / 3
         phi = epsilon * sin(gamma_b)
 
-        self.set_camera_orientation(phi=75 * DEGREES, theta=-20 * DEGREES, zoom=0.7, focal_distance=1000)
+        self.set_camera_orientation(phi=75 * DEGREES, theta=-20 * DEGREES, zoom=0.8, focal_distance=1000)
 
         rho1_circle = Circle(rho1, color=WHITE)
 
@@ -727,11 +724,11 @@ class SphericalRepr2(ThreeDScene):
 
         # epsilon (OM, OQ)
         arrows = arc_with_arrows(
-            func=lambda t: rotate(-epsilon * t, rotate(gamma_b, Y) * X) * rho1 * rotate(gamma_b * 0.5, Y) * X,
+            func=lambda t: rotate(-epsilon * t, positions["O"]) * rho1 * rotate(gamma_b * 0.5, Y) * X,
             tex_content="\\epsilon",
-            direction=0.5 * normalize(Z + Y),
+            direction=0.3 * normalize(Z + Y),
             n=n,
-            height=0.15,
+            height=0.1,
             color=BLUE,
         )
 
@@ -739,7 +736,7 @@ class SphericalRepr2(ThreeDScene):
         arrows += arc_with_arrows(
             func=lambda t: 0.5 * rho1 * rotate(gamma_b * t, Y) * X,
             tex_content="\\gamma_b",
-            direction=Y,
+            direction=-0.5 * Y,
             n=n,
             height=0.1,
             color=GREEN,
@@ -749,7 +746,7 @@ class SphericalRepr2(ThreeDScene):
         arrows += arc_with_arrows(
             func=lambda t: 0.5 * rho1 * rotate(phi * t, Z) * X,
             tex_content="\\varphi",
-            direction=0.5 * normalize(X - Z),
+            direction=0.3 * normalize(X - Z),
             n=n,
             height=0.1,
             color=RED,
@@ -759,7 +756,7 @@ class SphericalRepr2(ThreeDScene):
         arrows += arc_with_arrows(
             func=lambda t: rho1 * rotate(-phi2 * t, positions["O"]) * rotate(gamma_b * 0.2, Y) * X,
             tex_content="\\phi",
-            direction=0.5 * normalize(Z + Y),
+            direction=0.3 * normalize(Z + Y),
             n=n,
             height=0.1,
             color=WHITE,
@@ -769,10 +766,10 @@ class SphericalRepr2(ThreeDScene):
         arrows += arc_with_arrows(
             func=lambda t: rho1 * rotate(-theta * t - phi2, positions["O"]) * rotate(gamma_b * 0.2, Y) * X,
             tex_content="\\theta",
-            direction=0.5 * normalize(0.5 * Z + Y),
+            direction=0.3 * normalize(0.5 * Z + Y),
+            reverse=True,
             n=n,
             height=0.05,
-            order=((-1, 0), (8, 9)),
             color=WHITE,
         )
 
@@ -780,10 +777,9 @@ class SphericalRepr2(ThreeDScene):
         arrows += arc_with_arrows(
             func=lambda t: rho1 * rotate(eta * t, positions["P"]) * rotate(phi * 0.7, Z) * X,
             tex_content="\\eta",
-            direction=-0.2 * rotate(eta * 0.5, X) * Y,
+            direction=-0.1 * rotate(eta * 0.5, X) * Y,
             n=n,
             height=0.05,
-            order = ((-1, 0), (9, 10)),
             color=WHITE,
         )
 
@@ -854,9 +850,9 @@ class SphericalRepr2(ThreeDScene):
 class BevelAnimation(ThreeDScene):
 
     def construct(self):
-        z_pinion = 10
-        z = z_wheel = 20
-        m = 0.3
+        z = z_pinion = 10
+        z_wheel = 20
+        m = 0.5
         step = pi * m
         ka = 1
         kd = 1.25
@@ -873,8 +869,8 @@ class BevelAnimation(ThreeDScene):
         gamma_r = gamma_p - atan2(2 * kd * k, 1)
         gamma_f = gamma_p + atan2(2 * ka * k, 1)
 
-        # self.set_camera_orientation(phi=110 * DEGREES, theta=-50 * DEGREES, zoom=0.5, focal_distance=1000)
-        self.set_camera_orientation(phi=pi / 2, theta=pi / 2, zoom=0.4, focal_distance=1000)
+        # self.set_camera_orientation(phi=110 * DEGREES, theta=-50 * DEGREES, zoom=0.6, focal_distance=1000)
+        self.set_camera_orientation(phi=pi / 2, theta=pi / 2, zoom=0.6, focal_distance=1000)
 
         rb = rho1 * sin(gamma_b)
 
@@ -917,7 +913,7 @@ class BevelAnimation(ThreeDScene):
         self.add(group)
 
         self.wait()
-        self.move_camera(phi=110 * DEGREES, theta=-50 * DEGREES, zoom=0.5, focal_distance=1000)
+        self.move_camera(phi=110 * DEGREES, theta=-50 * DEGREES, zoom=0.6, focal_distance=1000)
         self.wait()
         self.play(Rotate(rho1_circle, angle=-t0, axis=Z, about_point=O))
 
@@ -971,9 +967,9 @@ class BevelAnimation(ThreeDScene):
 class BevelStaticInvolute(ThreeDScene):
 
     def construct(self):
-        z_pinion = 10
-        z = z_wheel = 20
-        m = 0.3
+        z = z_pinion = 10
+        z_wheel = 20
+        m = 0.5
         step = pi * m
         ka = 1
         kd = 1.25
@@ -990,7 +986,7 @@ class BevelStaticInvolute(ThreeDScene):
         gamma_r = gamma_p - atan2(2 * kd * k, 1)
         gamma_f = gamma_p + atan2(2 * ka * k, 1)
 
-        self.set_camera_orientation(phi=110 * DEGREES, theta=-50 * DEGREES, zoom=0.5, focal_distance=1000)
+        self.set_camera_orientation(phi=110 * DEGREES, theta=-50 * DEGREES, zoom=0.6, focal_distance=1000)
 
         rb = rho1 * sin(gamma_b)
 
