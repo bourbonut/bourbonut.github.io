@@ -2,6 +2,7 @@
 # manim -pqm movement.py -a
 # manim -pqm force.py -a
 # manim -pqm rack_gear.py -a
+# manim -pqm bevel_gear.py -a
 
 PNG="_ManimCE_v0.17.2.png"
 
@@ -11,6 +12,7 @@ SPUR=$PRJROOT/posts/involute-spur-gear
 SNN=$PRJROOT/posts/introduction-spiking-nn
 FL=$PRJROOT/posts/introduction-federated-learning
 RL=$PRJROOT/posts/introduction-reinforcement-learning
+BEVEL=$PRJROOT/posts/involute-bevel-gear
 
 # force
 force=$MEDIA/images/force/Gear2Gear$PNG
@@ -85,3 +87,21 @@ cp $eat $RL
 cp $expectedrewardanimation $RL
 cp $randompath $RL
 cp $rewardsdot $RL
+
+# New Manim version
+
+PNG="_ManimCE_v0.19.0.png"
+
+# bevel_gear
+bevel_animation=$MEDIA/videos/bevel_gear/720p30/BevelAnimation.mp4
+flat=$MEDIA/images/bevel_gear/BevelFlat$PNG
+section=$MEDIA/images/bevel_gear/BevelGearSection$PNG
+bevel_involute=$MEDIA/images/bevel_gear/BevelStaticInvolute$PNG
+bevel_systems=$MEDIA/images/bevel_gear/SphericalRepr$PNG
+bevel_params=$MEDIA/images/bevel_gear/SphericalRepr2$PNG
+cp $bevel_animation $BEVEL/involute-animation.mp4
+cp $flat $BEVEL/flat.png
+cp $section $BEVEL/section.png
+cp $bevel_involute $BEVEL/involute.png
+cp $bevel_systems $BEVEL/systems.png
+cp $bevel_params $BEVEL/params.png
