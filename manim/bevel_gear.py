@@ -126,20 +126,20 @@ class BevelGearSection(Scene):
 
         # Rho representation
         rho_repr = VGroup(
-            Line(perp * 0.5, perp * 1.2),
+            Line(perp * 0.2, perp * 0.9),
             Line(
-                rho1 * rotation(gamma_p) * X + perp * 0.5,
-                rho1 * rotation(gamma_p) * X + perp * 1.2,
+                rho1 * rotation(gamma_p) * X + perp * 0.6,
+                rho1 * rotation(gamma_p) * X + perp * 1.3,
             ),
             DoubleArrow(
-                perp * 0.85,
-                rho1 * rotation(gamma_p) * X + perp * 0.85,
+                perp * 0.55,
+                rho1 * rotation(gamma_p) * X + perp * 0.95,
                 stroke_width=3,
                 max_tip_length_to_length_ratio=0.04,
                 buff=0.025,
             ),
             MathTex("\\rho_1", font_size=32).move_to(
-                0.5 * rho1 * rotation(gamma_p) * X + perp * 1.1
+                0.5 * rho1 * rotation(gamma_p) * X + perp
             ),
         )
 
@@ -775,7 +775,6 @@ class SphericalRepr2(ThreeDScene):
             func=lambda t: rho1 * rotate(-theta * t - phi2, positions["O"]) * rotate(gamma_b * 0.2, Y) * X,
             tex_content="\\theta",
             direction=0.3 * normalize(0.5 * Z + Y),
-            reverse=True,
             n=n,
             height=0.05,
             color=WHITE,
