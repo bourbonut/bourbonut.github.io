@@ -273,6 +273,7 @@ def arc_with_arrows(
     n: int = 10,
     height: float = 0.15,
     reverse: bool = False,
+    font_size: int = 48,
     color: str | ManimColor = WHITE,
     phi_rot: float = 75 * DEGREES,
     theta_rot: float = pi / 2 - 20 * DEGREES,
@@ -294,6 +295,8 @@ def arc_with_arrows(
         Height of arrows
     reverse : bool
         Reverse arrows
+    font_size : int
+        Font size of text
     color : str | ManimColor
         Color of the arc
     phi_rot : float
@@ -306,7 +309,12 @@ def arc_with_arrows(
     list[VMobject]
         List of VMobject which composes the arc
     """
-    s1, s2, e1, e2 = (0, 1, 10, 9) if reverse else (1, 0, 9, 10)
+    s1, s2, e1, e2 = (3, 0, n - 3, n)
+    arrow_1 = Arrow3D(func(s1 / n), func(s2 / n), resolution=0, thickness=0, height=height, color=color)
+    arrow_2 = Arrow3D(func(e1 / n), func(e2 / n), resolution=0, thickness=0, height=height, color=color)
+    if reverse:
+        arrow_1 = arrow_1.rotate(pi, func(s2 / n), about_point=func(s2 / n))
+        arrow_2 = arrow_2.rotate(pi, func(e2 / n), about_point=func(e2 / n))
     return [
         Line(func(i / n), func((i + 1) / n), color=color)
         for i in range(n)
@@ -314,9 +322,9 @@ def arc_with_arrows(
         Line(func((i + 0.5) / n), func((i + 1.5) / n), color=color)
         for i in range(n - 1)
     ] + [
-        Arrow3D(func(s1 / n), func(s2 / n), resolution=0, thickness=0, height=height, color=color),
-        Arrow3D(func(e1 / n), func(e2 / n), resolution=0, thickness=0, height=height, color=color),
-        MathTex(tex_content, color=color)
+        arrow_1,
+        arrow_2,
+        MathTex(tex_content, color=color, font_size=font_size)
         .rotate(phi_rot, X, about_point=O)
         .rotate(theta_rot, Z, about_point=O)
         .next_to(func(0.5), direction=direction),
@@ -845,6 +853,174 @@ class SphericalRepr2(ThreeDScene):
             curve,
         ).move_to(0.2 * Z)
         self.add(group)
+
+
+class BevelFlat(ThreeDScene):
+
+    def construct(self):
+        z_pinion = 10
+        z_wheel = 20
+        m = 0.3
+        step = pi * m
+        ka = 1
+        kd = 1.25
+        pressure_angle = pi / 9
+        pitch_cone_angle = get_pitch_cone_angle(z_pinion, z_wheel)
+
+        # Pinion
+        gamma_pp = pitch_cone_angle
+        gamma_bp = asin(cos(pressure_angle) * sin(gamma_pp))
+        rpp = z_pinion * step / (2 * pi)
+        rho1 = rho1p = rpp / sin(gamma_pp)
+        rbp = rho1p * sin(gamma_bp)
+        phip = acos(tan(gamma_bp) / tan(gamma_pp))
+
+        # Wheel
+        gamma_pw = pi * 0.5 - pitch_cone_angle
+        gamma_bw = asin(cos(pressure_angle) * sin(gamma_pw))
+        rpw = z_wheel * step / (2 * pi)
+        rho1w = rpw / sin(gamma_pw)
+        rbw = rho1w * sin(gamma_bw)
+        phiw = acos(tan(gamma_bw) / tan(gamma_pw))
+
+        self.set_camera_orientation(phi=90 * DEGREES, theta=00 * DEGREES, zoom=1.1, focal_distance=1000)
+
+        O1 = rho1 * rotate(gamma_pp, Y) * X
+        O2 = rho1 * rotate(-gamma_pw, Y) * X
+        P = rho1 * X
+        M1 = rotate(-phip, O1) * rotate(gamma_pp, Y) * (rho1 * cos(gamma_bp) * X + rbp * Z)
+        M2 = rotate(-phiw, O2) * rotate(-gamma_pw, Y) * (rho1 * cos(gamma_bw) * X - rbw * Z)
+
+        sphere = Sphere(radius=rho1, fill_color=DARK_GRAY).set_opacity(0.01)
+
+        circles = VGroup(
+            Circle(rho1, color=WHITE),
+            Circle(rho1, color=WHITE).rotate(pi / 2, Y, about_point=O),
+            Circle(rho1, color=WHITE).rotate(-pressure_angle, X, about_point=O),
+            Circle(rbw, color=RED)
+            .rotate_about_origin(pi / 2 - gamma_pw, Y)
+            .move_to(rho1 * cos(gamma_bw) * rotate(-gamma_pw, Y) * X),
+            Circle(rbp, color=GREEN)
+            .rotate_about_origin(pi / 2 + gamma_pp, Y)
+            .move_to(rho1 * cos(gamma_bp) * rotate(gamma_pp, Y) * X)
+        )
+
+        dots = VGroup(
+            Dot3D(O1, color=GREEN),
+            Dot3D(O2, color=RED),
+            Dot3D(P, color=WHITE),
+            Dot3D(M1, color=GREEN),
+            Dot3D(M2, color=RED),
+        )
+
+        tex = VGroup(
+            MathTex("O_1", color=GREEN, font_size=32)
+            .rotate(pi / 2, X, about_point=O)
+            .rotate(pi / 2, Z, about_point=O)
+            .next_to(O1, direction=-Z),
+            MathTex("O_2", color=RED, font_size=32)
+            .rotate(pi / 2, X, about_point=O)
+            .rotate(pi / 2, Z, about_point=O)
+            .next_to(O2, direction=0.3 * Z),
+            MathTex("M_1", color=GREEN, font_size=32)
+            .rotate(pi / 2, X, about_point=O)
+            .rotate(pi / 2, Z, about_point=O)
+            .next_to(M1, direction=Y),
+            MathTex("M_2", color=RED, font_size=32)
+            .rotate(pi / 2, X, about_point=O)
+            .rotate(pi / 2, Z, about_point=O)
+            .next_to(M2, direction=-Y),
+            MathTex("P_0", color=WHITE, font_size=32)
+            .rotate(pi / 2, X, about_point=O)
+            .rotate(pi / 2, Z, about_point=O)
+            .next_to(P, direction=0.3 * normalize(Z + Y)),
+            MathTex("\\gamma_{b_1}", color=GREEN, font_size=32)
+            .rotate(pi / 2, X, about_point=O)
+            .rotate(pi / 2, Z, about_point=O)
+            .next_to(
+                rotate(-phip, O1) * rotate(gamma_pp, Y) * (rho1 * cos(gamma_bp * 0.5) * X + rbp * 0.5 * Z),
+                direction=0.3 * Y,
+            ),
+            MathTex("\\gamma_{b_2}", color=RED, font_size=32)
+            .rotate(pi / 2, X, about_point=O)
+            .rotate(pi / 2, Z, about_point=O)
+            .next_to(
+                rotate(-phiw, O2) * rotate(-gamma_pw, Y) * (rho1 * cos(gamma_bw * 0.5) * X - rbw * 0.5 * Z),
+                direction=0.3 * normalize(Z - Y)
+            ),
+            MathTex("\\gamma_{p_1}", color=GREEN, font_size=32)
+            .rotate(pi / 2, X, about_point=O)
+            .rotate(pi / 2, Z, about_point=O)
+            .next_to(
+                rotate(gamma_pp, Y) * (rho1 * cos(gamma_bp * 0.5) * X + rbp * 0.5 * Z),
+                direction=-0.3 * Y,
+            ),
+            MathTex("\\gamma_{p_2}", color=RED, font_size=32)
+            .rotate(pi / 2, X, about_point=O)
+            .rotate(pi / 2, Z, about_point=O)
+            .next_to(
+                rotate(-gamma_pw, Y) * (rho1 * cos(gamma_bw * 0.5) * X - rbw * 0.5 * Z),
+                direction=-0.3 * normalize(Z - Y)
+            ),
+        )
+
+        n = 10
+
+        # Arc between O1 and O2
+        lines = arc(
+            func=lambda t: rotate((gamma_pp + gamma_pw) * t, Y) * O2,
+            n=n,
+            color=WHITE,
+        )
+
+        # Arc between O1 and M1
+        lines += arc(
+            func=lambda t: rotate(gamma_bp * t, cross(O1, M1)) * O1,
+            n=n,
+            color=GREEN,
+        )
+
+        # Arc between O2 and M2
+        lines += arc(
+            func=lambda t: rotate(gamma_bw * t, cross(O2, M2)) * O2,
+            n=n,
+            color=RED,
+        )
+
+        # Arc for alpha
+        arcs = arc_with_arrows(
+            func=lambda t: rotate(-pressure_angle * t, X) * 0.5 * rho1 * Y,
+            tex_content="\\alpha",
+            direction=0.5 * Y,
+            font_size=32,
+            theta_rot=pi / 2,
+            phi_rot=pi / 2,
+        )
+
+        # Arc between O1P and O1M1
+        arcs += arc_with_arrows(
+            func=lambda t: rotate(-phip * t, O1) * rotate(gamma_pp, Y) * (rho1 * cos(gamma_bp * 0.5) * X + rbp * 0.5 * Z),
+            tex_content="\\phi_{p_1}",
+            reverse=True,
+            direction=0.7 * Z + 0.001 * Y,
+            height=0.1,
+            font_size=32,
+            theta_rot=pi / 2,
+            phi_rot=pi / 2,
+        )
+
+        # Arc between O2P and O2M2
+        arcs += arc_with_arrows(
+            func=lambda t: rotate(-phiw * t, O2) * rotate(-gamma_pw, Y) * (rho1 * cos(gamma_bw * 0.5) * X - rbw * 0.5 * Z),
+            tex_content="\\phi_{p_2}",
+            height=0.1,
+            direction=-Z,
+            font_size=32,
+            theta_rot=pi / 2,
+            phi_rot=pi / 2,
+        )
+
+        self.add(sphere, circles, dots, tex, *lines, *arcs)
 
 
 class BevelAnimation(ThreeDScene):
