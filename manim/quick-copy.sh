@@ -102,6 +102,7 @@ bevel_involute=$MEDIA/images/bevel_gear/BevelStaticInvolute$PNG
 bevel_systems=$MEDIA/images/bevel_gear/SphericalRepr$PNG
 bevel_params=$MEDIA/images/bevel_gear/SphericalRepr2$PNG
 bevel_transmission=$MEDIA/images/bevel_gear/BevelTransmission$PNG
+bevel_interference_params=$MEDIA/images/bevel_gear/BevelInterParams$PNG
 # Part 1
 cp $bevel_animation $BEVEL_1/involute-animation.mp4
 cp $flat $BEVEL_1/flat.png
@@ -110,6 +111,7 @@ cp $bevel_involute $BEVEL_1/involute.png
 cp $bevel_transmission $BEVEL_1/transmission.png
 
 # Part 2
+cp $bevel_inter_params $BEVEL_2/interference-params.png
 cp $bevel_transmission $BEVEL_2/transmission.png
 cp $bevel_systems $BEVEL_2/systems.png
 cp $bevel_params $BEVEL_2/params.png
