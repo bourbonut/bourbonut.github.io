@@ -138,7 +138,7 @@ class BevelGearSection(Scene):
                 max_tip_length_to_length_ratio=0.04,
                 buff=0.025,
             ),
-            MathTex("\\rho_1", font_size=32).move_to(
+            MathTex("\\rho_1").move_to(
                 0.5 * rho1 * rotation(gamma_p) * X + perp
             ),
         )
@@ -162,7 +162,7 @@ class BevelGearSection(Scene):
                     )
                     .add_tip(tip_width=0.15, tip_length=0.15, at_start=True)
                     .add_tip(tip_width=0.15, tip_length=0.15),
-                    MathTex(tex, font_size=32, color=color).move_to(
+                    MathTex(tex, color=color).move_to(
                         rho1 * (k + 0.05) * rotation(gamma * 0.5) * X
                     ),
                 )
@@ -188,8 +188,8 @@ class BevelGearSection(Scene):
             Cross(scale_factor=0.08, stroke_color=BLUE, stroke_width=3)
             .rotate(gamma_p)
             .move_to(rho1 * 1.08 * rotation(gamma_p) * X),
-            MathTex("k_a \\cdot m", font_size=32, color=BLUE)
-            .move_to(rho1 * 1.1 * rotation(gamma_p) * X + ka * m * perp * 2.2),
+            MathTex("k_a \\cdot m", color=BLUE)
+            .move_to(rho1 * 1.15 * rotation(gamma_p) * X + ka * m * perp * 2.2),
         )
         kd_repr = VGroup(
             Line(
@@ -207,7 +207,7 @@ class BevelGearSection(Scene):
             Cross(scale_factor=0.08, stroke_color=BLUE, stroke_width=3)
             .rotate(gamma_p)
             .move_to(rho1 * 1.14 * rotation(gamma_p) * X),
-            MathTex("k_d \\cdot m", font_size=32, color=BLUE)
+            MathTex("k_d \\cdot m", color=BLUE)
             .move_to(rho1 * 1.13 * rotation(gamma_p) * X - kd * m * perp * 2),
         )
 
@@ -221,7 +221,7 @@ class BevelGearSection(Scene):
                 buff=0.025,
                 color=YELLOW,
             ),
-            MathTex("r_p", font_size=32, color=YELLOW).move_to(0.96 * rp / tan(gamma_p) * X + rp * 0.5 * Y)
+            MathTex("r_p", color=YELLOW).move_to(0.95 * rp / tan(gamma_p) * X + rp * 0.5 * Y)
         )
 
         group = VGroup(
