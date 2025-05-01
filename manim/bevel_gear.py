@@ -1662,7 +1662,7 @@ class BevelTransmission(ThreeDScene):
 
         # Arc for alpha
         arcs = arc_with_arrows(
-            func=lambda t: -rotate(-pressure_angle * t, X) * 0.37 * rho1 * Y,
+            func=lambda t: -rotate(-pressure_angle * t, X) * 0.4 * rho1 * Y,
             tex_content="\\alpha",
             direction=-0.5 * Y,
             theta_rot=pi / 2,
