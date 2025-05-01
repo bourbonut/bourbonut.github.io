@@ -8,6 +8,8 @@ categories: [mechanics]
 Bevel gears are designed to transmit mechanical energy between intersecting shafts.
 However, to design them in a CAD software can be a tough task.
 
+![Figure : Transmission with torque](transmission.png)
+
 # Involute function
 
 Historically, bevel gears were imagined and designed to be spherical gears.
@@ -59,7 +61,7 @@ $$
 \rho_1 = \frac{r}{\sin(\gamma)}
 $$
 
-More specifically, for <span style="background:#100F0F; color:#fefe00;border-radius: 5px;padding:2px;">the pitch radius</span> and the <span style="background:#100F0F; color:#fefe00;border-radius: 5px;padding:2px;">pitch cone angle</span>, the relation is:
+More specifically, for the pitch radius $r_p$ and the pitch cone angle $\gamma_p$, the relation is:
 
 $$
 \boxed{
@@ -203,7 +205,7 @@ $$
 \end{pmatrix}
 $$
 
-By doing a change of variable $t$ by $t + t_0$ and normalizing $\overrightarrow{\theta(t)}$, the involute function of a bevel gear can be written as:
+By doing a change of variable $t$ by $t + t_0$ and normalizing $\overrightarrow{\theta(t)}$, the [involute function]{.underline} of a bevel gear can be written as:
 $$
 \boxed{
     \overrightarrow{\theta(t)} = \begin{pmatrix}
