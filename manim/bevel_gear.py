@@ -1698,7 +1698,6 @@ class BevelInterParams(ThreeDScene):
         gamma_b = asin(cos(pressure_angle) * sin(gamma_p))
         rp = z_pinion * step / (2 * pi)
         rho1 = rp / sin(gamma_p)
-        rb = rho1 * sin(gamma_b)
 
         t_min, t_max, phase1, phase2, involute = spherical_rack_tools(z, pressure_angle, ka, kd)
 
@@ -1715,10 +1714,10 @@ class BevelInterParams(ThreeDScene):
         self.set_camera_orientation(phi=90 * DEGREES, theta=-90 * DEGREES, zoom=0.7, focal_distance=1000)
         self.add(
             sphere,
-            rack.rotate(gamma_b - pi / 2, Y, about_point=O),
-            Circle(rb).move_to(rho1 * cos(gamma_b) * Z),
+            rack.rotate(gamma_p - pi / 2, Y, about_point=O),
+            Circle(rp).move_to(rho1 * cos(gamma_p) * Z),
             Circle(rho1, color=WHITE).rotate(pi / 2, X, about_point=O),
-            DashedVMobject(Circle(rho1, color=YELLOW).rotate(gamma_b - pi / 2, Y, about_point=O), dashed_ratio=0.2),
+            DashedVMobject(Circle(rho1, color=YELLOW).rotate(gamma_p - pi / 2, Y, about_point=O), dashed_ratio=0.2),
             Dot3D(O),
             MathTex("O")
             .rotate(pi / 2, X, about_point=O)
@@ -1727,19 +1726,19 @@ class BevelInterParams(ThreeDScene):
             MathTex("\\overrightarrow{\\gamma(t)}", color=WHITE)
             .rotate(pi / 2, X, about_point=O)
             .rotate(O, Z, about_point=O)
-            .next_to(rho1 * rotate(gamma_b, Y) * Z, direction=2 * X),
+            .next_to(rho1 * rotate(gamma_p, Y) * Z, direction=2 * X),
             MathTex("\\overrightarrow{\\gamma_{int}(t)}", color=YELLOW)
             .rotate(pi / 2, X, about_point=O)
             .rotate(O, Z, about_point=O)
             .next_to(rho1 * vec3(-cos(gamma_p), 0, sin(gamma_p)), direction=-X),
-            Tex("Pitch circle", color=YELLOW)
+            Tex("Pitch rack circle", color=YELLOW)
             .rotate(pi / 2, X, about_point=O)
             .rotate(O, Z, about_point=O)
-            .next_to(-rho1 * rotate(gamma_b - pi / 2, Y) * X, direction=-X),
-            Tex("Base cone circle", color=RED)
+            .next_to(-rho1 * rotate(gamma_p - pi / 2, Y) * X, direction=-X),
+            Tex("Pitch cone circle", color=RED)
             .rotate(pi / 2, X, about_point=O)
             .rotate(O, Z, about_point=O)
-            .next_to(rho1 * rotate(-gamma_b, Y) * Z, direction=-1.5 * X),
-            Arrow3D(O, rho1 * rotate(gamma_b, Y) * Z),
+            .next_to(rho1 * rotate(-gamma_p, Y) * Z, direction=-1.5 * X),
+            Arrow3D(O, rho1 * rotate(gamma_p, Y) * Z),
             Arrow3D(O, rho1 * vec3(-cos(gamma_p), 0, sin(gamma_p)), color=YELLOW),
         )
