@@ -1496,7 +1496,7 @@ def spherical_gearprofile(
     # Calculation of offsets due to geometry of spherical rack
     _, t_rack_max, phase1, _, rinvolute = spherical_rack_tools(1 / k, pressure_angle, ka, kd)
     interference = lambda t, t0 : spherical_involuteof(gamma_p, t0, alpha, t)
-    alpha = 2 * ka * k
+    alpha = atan2(2 * ka * k, 1)
     n1, n2 = rinvolute(t_rack_max, 0) * vec3(1, 1, 0), rinvolute(-t_rack_max, phase1) * vec3(1, 1, 0)
     beta = 0.5 * anglebt(n1, n2) * length(n1) / sin_b
 
