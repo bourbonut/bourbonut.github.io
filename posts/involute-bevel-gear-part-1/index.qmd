@@ -10,6 +10,8 @@ However, to design them in a CAD software can be a tough task.
 
 ![Figure : Transmission with torque](transmission.png)
 
+In this part, we will see how to compute the involute function of a bevel gear.
+
 # Involute function
 
 Historically, bevel gears were imagined and designed to be spherical gears.
