@@ -12,7 +12,9 @@ SPUR=$PRJROOT/posts/involute-spur-gear
 SNN=$PRJROOT/posts/introduction-spiking-nn
 FL=$PRJROOT/posts/introduction-federated-learning
 RL=$PRJROOT/posts/introduction-reinforcement-learning
-BEVEL=$PRJROOT/posts/involute-bevel-gear-part-1
+BEVEL_1=$PRJROOT/posts/involute-bevel-gear-part-1
+BEVEL_2=$PRJROOT/posts/involute-bevel-gear-part-2
+BEVEL_3=$PRJROOT/posts/involute-bevel-gear-part-3
 
 # force
 force=$MEDIA/images/force/Gear2Gear$PNG
@@ -100,10 +102,17 @@ bevel_involute=$MEDIA/images/bevel_gear/BevelStaticInvolute$PNG
 bevel_systems=$MEDIA/images/bevel_gear/SphericalRepr$PNG
 bevel_params=$MEDIA/images/bevel_gear/SphericalRepr2$PNG
 bevel_transmission=$MEDIA/images/bevel_gear/BevelTransmission$PNG
-cp $bevel_animation $BEVEL/involute-animation.mp4
-cp $flat $BEVEL/flat.png
-cp $section $BEVEL/section.png
-cp $bevel_involute $BEVEL/involute.png
-cp $bevel_systems $BEVEL/systems.png
-cp $bevel_params $BEVEL/params.png
-cp $bevel_transmission $BEVEL/transmission.png
+# Part 1
+cp $bevel_animation $BEVEL_1/involute-animation.mp4
+cp $flat $BEVEL_1/flat.png
+cp $section $BEVEL_1/section.png
+cp $bevel_involute $BEVEL_1/involute.png
+cp $bevel_transmission $BEVEL_1/transmission.png
+
+# Part 2
+cp $bevel_transmission $BEVEL_2/transmission.png
+cp $bevel_systems $BEVEL_2/systems.png
+cp $bevel_params $BEVEL_2/params.png
+
+# Part 3
+cp $bevel_transmission $BEVEL_2/transmission.png
