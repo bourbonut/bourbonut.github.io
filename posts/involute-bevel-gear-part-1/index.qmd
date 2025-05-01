@@ -190,20 +190,20 @@ $$
 
 ### Simplifications
 
-By using the relation $\frac{r_b}{\rho_1} = \sin(\gamma_p)$ and $r_b = \sin(\gamma_p) \cdot \sin(\gamma_p)$, the following relations can be simplified:
+By using the relation $\frac{r_b}{\rho_1} = \sin(\gamma_b)$ and $r_b = \rho_1 \cdot \sin(\gamma_b)$, the following relations can be simplified:
 $$
 \phi(t) = \frac{(t - t_0) \times r_b}{\rho_1} = \sin(\gamma_b) \cdot (t - t_0)
 $$
 $$
-\sqrt{\rho_1^2 - r_b^2} = \sqrt{\rho_1^2 \times (1 - \sin^2(\gamma_p))} = \sqrt{\rho_1^2 \times \cos^2(\gamma_p)} = \rho_1 \cdot \cos(\gamma_p)
+\sqrt{\rho_1^2 - r_b^2} = \sqrt{\rho_1^2 \times (1 - \sin^2(\gamma_b))} = \sqrt{\rho_1^2 \times \cos^2(\gamma_b)} = \rho_1 \cdot \cos(\gamma_b)
 $$
 
 Thus $\overrightarrow{\theta(t)}$ becomes:
 $$
 \overrightarrow{\theta(t)} = \rho_1 \cdot \begin{pmatrix}
-    \sin(\gamma_p) \cos(\sin(\gamma_p) \cdot (t - t_0)) \cos(t) + \sin(\sin(\gamma_p) \cdot (t - t_0)) \sin(t) \\
-    \sin(\gamma_p) \cos(\sin(\gamma_p) \cdot (t - t_0)) \sin(t) - \sin(\sin(\gamma_p) \cdot (t - t_0)) \cos(t) \\
-    \cos(\gamma_p) \cos(\sin(\gamma_p) \cdot (t - t_0))
+    \sin(\gamma_b) \cos(\sin(\gamma_b) \cdot (t - t_0)) \cos(t) + \sin(\sin(\gamma_b) \cdot (t - t_0)) \sin(t) \\
+    \sin(\gamma_b) \cos(\sin(\gamma_b) \cdot (t - t_0)) \sin(t) - \sin(\sin(\gamma_b) \cdot (t - t_0)) \cos(t) \\
+    \cos(\gamma_b) \cos(\sin(\gamma_b) \cdot (t - t_0))
 \end{pmatrix}
 $$
 
@@ -211,9 +211,9 @@ By doing a change of variable $t$ by $t + t_0$ and normalizing $\overrightarrow{
 $$
 \boxed{
     \overrightarrow{\theta(t)} = \begin{pmatrix}
-        \sin(\gamma_p) \cos(\sin(\gamma_p) \cdot t) \cos(t + t_0) + \sin(\sin(\gamma_p) \cdot t) \sin(t + t_0) \\
-        \sin(\gamma_p) \cos(\sin(\gamma_p) \cdot t) \sin(t + t_0) - \sin(\sin(\gamma_p) \cdot t) \cos(t + t_0) \\
-        \cos(\gamma_p) \cos(\sin(\gamma_p) \cdot t)
+        \sin(\gamma_b) \cos(\sin(\gamma_b) \cdot t) \cos(t + t_0) + \sin(\sin(\gamma_b) \cdot t) \sin(t + t_0) \\
+        \sin(\gamma_b) \cos(\sin(\gamma_b) \cdot t) \sin(t + t_0) - \sin(\sin(\gamma_b) \cdot t) \cos(t + t_0) \\
+        \cos(\gamma_b) \cos(\sin(\gamma_b) \cdot t)
     \end{pmatrix}
 }
 $$
