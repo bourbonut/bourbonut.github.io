@@ -52,7 +52,7 @@ $$
 $$
 
 ::: {.callout-tip}
-Since the difference between $\rho_1$ and $\rho_0$ is equivalent to the tooth depth, its relation can be reworked and adapted with a third parameter which would be the *tooth depth*.
+Since the difference between $\rho_1$ and $\rho_0$ is equivalent to the tooth depth, its relation can be reworked and adapted with a third parameter which would be the *tooth depth*. Often, the standard expression is $\rho_0 = \rho_1 - F_w$ where $F_w$ is the face width, generally equals to $\frac{1}{3} \rho_1$.
 :::
 
 ### Pitch radius
@@ -109,7 +109,7 @@ On figure 2, points $M_1$ and $M_2$ are normal to their spherical centers $O_1$ 
 
 Also the angles $\widehat{O_1PM_1}$ and $\widehat{O_2PM_2}$ are equal to $\pi / 2 - \alpha$ (i.e. $90° - \alpha$).
 
-By using the [law of sinus (section *Spherical law of sines*)](https://en.wikipedia.org/wiki/Law_of_sines), we can determine the following relation:
+By using the [law of sines](https://en.wikipedia.org/wiki/Law_of_sines#Spherical_law_of_sines), we can determine the following relation:
 
 $$
 \frac {\sin(\gamma_b)} {\sin(90° - \alpha)} = \frac {\sin(\gamma_p)} {\sin(90°)}
