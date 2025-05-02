@@ -2,7 +2,7 @@
 title: "Spur Tooth Profile"
 author: "Benjamin Bourbon"
 date: "2023-01-08"
-categories: [mechanic]
+categories: [mechanics]
 ---
 
 Involute gears are the most popular power transmission devices. 
