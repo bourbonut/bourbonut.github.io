@@ -20,7 +20,7 @@
   --quarto-hl-bn-color: #ebcb8b;
   --quarto-hl-fl-color: #ebcb8b;
   --quarto-hl-cn-color: #e6c284;
-  --quarto-hl-co-color: #42464e;
+  --quarto-hl-co-color: #98c379;
   --quarto-hl-do-color: #607880;
   --quarto-hl-an-color: #ca60ca;
   --quarto-hl-cv-color: #0095ff;
@@ -141,7 +141,7 @@ code span.cn {
 }
 
 code span.co {
-  color: #42464e;
+  color: #98c379;
 }
 
 code span.do {
@@ -184,4 +184,4 @@ code span.er {
   content: "</";
 }
 
-/*# sourceMappingURL=e154ba44d6125ac25996acaa2aefc232.css.map */
+/*# sourceMappingURL=5dd283c027e67051d099ea0200936ce1.css.map */

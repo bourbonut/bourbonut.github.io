@@ -2,6 +2,9 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/involute-bevel-gear-part-3/index.html",
+      "/posts/involute-bevel-gear-part-2/index.html",
+      "/posts/involute-bevel-gear-part-1/index.html",
       "/posts/introduction-reinforcement-learning/index.html",
       "/posts/introduction-federated-learning/index.html",
       "/posts/introduction-spiking-nn/index.html",
