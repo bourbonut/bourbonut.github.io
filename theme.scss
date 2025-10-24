@@ -47,6 +47,15 @@ div.sourceCode{
   border: 2px solid $comment-color;
 }
 
+.anchored > code {
+  background-color: $background-color;
+  border: 2px solid $comment-color;
+}
+
+pre > code {
+  color: #abb2bf;
+}
+
 input[type=button] {
   color: $text-color;
   text-decoration:none;
@@ -56,4 +65,26 @@ input[type=button] {
 
 .img-fluid {
   border-radius: 8px;
+}
+
+.center {
+  justify-content: center;
+  align-items: center;
+}
+
+@media (min-width: 960px) {
+  .mahjong-grid {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 30px;
+    margin-bottom: 20px;
+  }
+}
+
+.mahjong-img {
+  max-width: 300px;
+}
+
+.mahjong-grid > img {
+  max-width: 300px;
 }
