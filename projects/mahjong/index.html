@@ -74,7 +74,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-740953bbf8f7ba31f1501eae1f8c6816.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-0a60c3b440fbfff32cf248ac2880738b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-797e5bc9b020b7d9cd030a8d01f0872f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -333,7 +333,7 @@ window.Quarto = {
 <section id="more-details" class="level2">
 <h2 class="anchored" data-anchor-id="more-details">More details</h2>
 <section id="solver.validmergevec2d-a-vec2d-b" class="level3">
-<h3 class="anchored" data-anchor-id="solver.validmergevec2d-a-vec2d-b"><code>Solver.validMerge(Vec2D a, Vec2D b)</code></h3>
+<h3 class="anchored" data-anchor-id="solver.validmergevec2d-a-vec2d-b">Solver.validMerge(Vec2D a, Vec2D b)</h3>
 <p>We want to verify if a path exists between two tiles. First and foremost, we check if two tiles can be <em>paired</em>; if it’s the case, we continue the program, else we returns <code>false</code> (see <code>Solver.validMerge(Vec2D a, Vec2D b)</code>):</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode java code-with-copy"><code class="sourceCode java"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">boolean</span> <span class="fu">validMerge</span><span class="op">(</span>Vec2D a<span class="op">,</span> Vec2D b<span class="op">)</span> <span class="op">{</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Checks if the tiles are equivalent</span></span>
@@ -425,7 +425,7 @@ window.Quarto = {
 <p>By following these process, all possible paths are checked and a path with a maximum of two shifts can be found if exists.</p>
 </section>
 <section id="generatesolvablestatic" class="level3">
-<h3 class="anchored" data-anchor-id="generatesolvablestatic"><code>generateSolvableStatic()</code></h3>
+<h3 class="anchored" data-anchor-id="generatesolvablestatic">generateSolvableStatic()</h3>
 <p>When I was wondering if it is possible to make a solvable generation but also random, two ideas came to my mind.</p>
 <p>The first one is simple: progress in the resolution of the board until reaching a step where there are no possible next move and then managing the last tiles in order to be able to continue the resolution. For that, some automatic resolution functions must exist.</p>
 <div class="mahjong-grid center">
@@ -455,7 +455,7 @@ Note
 </div>
 </section>
 <section id="generatestaticline" class="level3">
-<h3 class="anchored" data-anchor-id="generatestaticline"><code>generateStaticLine()</code></h3>
+<h3 class="anchored" data-anchor-id="generatestaticline">generateStaticLine()</h3>
 <p>This method is the second one, designed to be faster for generation. It creates easier boards to solve.</p>
 <p>This method involves to place two tiles in order to be aligned. They are going to be the board base. Then, for each new placed tile, it must be placed with a tile already placed and its pair will be placed on the same straight line in relation to the first tile and near an already placed tile.</p>
 <div class="center" style="text-align: center;">
