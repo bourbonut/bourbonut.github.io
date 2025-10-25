@@ -122,7 +122,7 @@ In `game/Tile.java`:
 
 ## More details
 
-### `Solver.validMerge(Vec2D a, Vec2D b)`
+### Solver.validMerge(Vec2D a, Vec2D b)
 
 We want to verify if a path exists between two tiles. First and foremost, we check if two tiles can be *paired*; if it's the case, we continue the program, else we returns `false` (see `Solver.validMerge(Vec2D a, Vec2D b)`):
 
@@ -230,7 +230,7 @@ while (true) {
 
 By following these process, all possible paths are checked and a path with a maximum of two shifts can be found if exists.
 
-### `generateSolvableStatic()`
+### generateSolvableStatic()
 
 When I was wondering if it is possible to make a solvable generation but also random, two ideas came to my mind.
 
@@ -253,7 +253,7 @@ When the resolution is finished, the board is solvable.
 `generateSolvableStatic()` follows these steps and is based on `Solver.nextMerge()` to move forward the resolution.
 :::
 
-### `generateStaticLine()`
+### generateStaticLine()
 
 This method is the second one, designed to be faster for generation. It creates easier boards to solve.
 
