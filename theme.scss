@@ -93,3 +93,13 @@ input[type=button] {
 .mahjong-grid > img {
   max-width: 300px;
 }
+
+.math.display {
+  display: block;
+  overflow: auto;
+}
+
+.table {
+  display: block;
+  overflow: auto;
+}
